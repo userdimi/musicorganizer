@@ -1,4 +1,4 @@
-name: Super Heroes App
+name: Music Organizer
 
 on: [ push, pull_request ]
 
@@ -31,6 +31,9 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
+      - name: Run Kotlin Linter
+        run: ./gradlew ktlintCheck
 
       - name: Rund Android Linter
         run: ./gradlew lintDebug
