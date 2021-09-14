@@ -9,9 +9,6 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      PUBLIC_API_KEY: ${{ secrets.PUBLIC_API_KEY }}
-      PRIVATE_API_KEY: ${{ secrets.PRIVATE_API_KEY }}
 
     steps:
       - name: Clone Repo
