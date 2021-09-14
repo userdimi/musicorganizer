@@ -54,6 +54,13 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
+    // Network
+    def retrofit_version = '2.9.0'
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    def ok_http_version = "4.7.2"
+    implementation "com.squareup.okhttp3:logging-interceptor:$ok_http_version"
+
     // Unit Testing
     def junit_version = '4.13.2'
     testImplementation "junit:junit:$junit_version"
