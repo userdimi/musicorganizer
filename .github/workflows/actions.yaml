@@ -1,4 +1,4 @@
-name: Super Heroes App
+name: Music Organizer
 
 on: [ push, pull_request ]
 
