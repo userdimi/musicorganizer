@@ -32,6 +32,9 @@ jobs:
         with:
           java-version: 11
 
+      - name: Run Kotlin Linter
+        run: ./gradlew ktlintCheck
+
       - name: Rund Android Linter
         run: ./gradlew lintDebug
 
