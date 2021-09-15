@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import de.colognecode.musicorganizer.BuildConfig
-import de.colognecode.musicorganizer.repository.LastFMApi
+import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -42,7 +42,7 @@ class NetworkModule {
     }
 
     @Provides
-    fun provideLastFMApi(retrofit: Retrofit): LastFMApi {
-        return retrofit.create(LastFMApi::class.java)
+    fun provideLastFMApi(retrofit: Retrofit): LastFMApiService {
+        return retrofit.create(LastFMApiService::class.java)
     }
 }
