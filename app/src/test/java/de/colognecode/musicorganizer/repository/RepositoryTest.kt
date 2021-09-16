@@ -1,5 +1,6 @@
 package de.colognecode.musicorganizer.repository
 
+import de.colognecode.musicorganizer.repository.Repository.Companion.DELAY_ONE_SECOND
 import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.ArtistItem
 import de.colognecode.musicorganizer.repository.network.model.ArtistSearchResponse
@@ -12,6 +13,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -29,33 +31,32 @@ internal class RepositoryTest {
     private val testArtist = "testArtist"
     private val testApikey = "12345"
     private val testFormat = "json"
+    private val testArtistItem1 = ArtistItem(
+        listOf(),
+        "tesMbid",
+        "1234567",
+        "yes",
+        "fooMusic",
+        "https://fooMusic.com"
+    )
+    private val testArtistItem2 = ArtistItem(
+        listOf(),
+        "tesMbid",
+        "1234567",
+        "no",
+        "barMusic",
+        "https://barMusic.com"
+    )
+    private val testArtistMatches = Artistmatches(listOf(testArtistItem1, testArtistItem2))
     private val repository = Repository(mockApiService, testApikey, testFormat, testDispatcher)
 
     @Nested
     inner class ArtistSearch {
         @InternalCoroutinesApi
         @Test
-        fun `artist search emits successfully`() = runBlocking {
+        fun `artist search emit successfully`() = runBlocking {
             // arrange
-            val testArtistItem1 = ArtistItem(
-                listOf(),
-                "tesMbid",
-                "1234567",
-                "yes",
-                "fooMusic",
-                "https://fooMusic.com"
-            )
-            val testArtistItem2 = ArtistItem(
-                listOf(),
-                "tesMbid",
-                "1234567",
-                "no",
-                "barMusic",
-                "https://barMusic.com"
-            )
-            val artistMatches = Artistmatches(listOf(testArtistItem1, testArtistItem2))
-            every { mockkSearchResponse.results?.artistmatches } returns artistMatches
-
+            every { mockkSearchResponse.results?.artistmatches } returns testArtistMatches
             coEvery {
                 mockApiService.getArtists(
                     any(),
@@ -78,7 +79,7 @@ internal class RepositoryTest {
         }
 
         @Test
-        fun `should retry search after error`() = testDispatcher.runBlockingTest {
+        fun `artist search emit error`() = testDispatcher.runBlockingTest {
             // arrange
             coEvery {
                 mockApiService.getArtists(
@@ -95,6 +96,38 @@ internal class RepositoryTest {
             // assert
             flowResult.collect {
                 it.isFailure.shouldBeTrue()
+            }
+        }
+
+        @Test
+        fun `artist search retry emit success`() = testDispatcher.runBlockingTest {
+            // arrange
+            var shouldThrowError = true
+            coEvery {
+                mockApiService.getArtists(
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } answers {
+                if (shouldThrowError) throw IOException() else mockkSearchResponse
+            }
+
+            pauseDispatcher {
+                // act
+                val flowResult = repository.getArtistsSearchResult(testMethod, testArtist)
+                // assert
+                launch {
+                    flowResult.collect {
+                        it.isSuccess.shouldBeTrue()
+                    }
+                }
+                // 1st retry
+                advanceTimeBy(DELAY_ONE_SECOND)
+                // 2st retry
+                shouldThrowError = false
+                advanceTimeBy(DELAY_ONE_SECOND)
             }
         }
     }
