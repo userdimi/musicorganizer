@@ -5,7 +5,6 @@ import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.ArtistItem
 import de.colognecode.musicorganizer.repository.network.model.ArtistSearchResponse
 import de.colognecode.musicorganizer.repository.network.model.Artistmatches
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -27,10 +26,7 @@ internal class RepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val mockApiService = mockk<LastFMApiService>(relaxed = true)
     private val mockkSearchResponse = mockk<ArtistSearchResponse>(relaxed = true)
-    private val testMethod = "testMethod"
     private val testArtist = "testArtist"
-    private val testApikey = "12345"
-    private val testFormat = "json"
     private val testArtistItem1 = ArtistItem(
         listOf(),
         "tesMbid",
@@ -48,7 +44,7 @@ internal class RepositoryTest {
         "https://barMusic.com"
     )
     private val testArtistMatches = Artistmatches(listOf(testArtistItem1, testArtistItem2))
-    private val repository = Repository(mockApiService, testApikey, testFormat, testDispatcher)
+    private val repository = Repository(mockApiService, testDispatcher)
 
     @Nested
     inner class ArtistSearch {
@@ -60,21 +56,16 @@ internal class RepositoryTest {
             coEvery {
                 mockApiService.getArtists(
                     any(),
-                    any(),
-                    any(),
                     any()
                 )
             } returns mockkSearchResponse
 
             // act
-            val flowResult = repository.getArtistsSearchResult(testMethod, testArtist)
+            val flowResult = repository.getArtistsSearchResult(testArtist)
 
             // assert
-            flowResult.collect { result ->
-                result.isSuccess.shouldBeTrue()
-                result.onSuccess { artistMatches ->
-                    artistMatches shouldBe artistMatches
-                }
+            flowResult.collect {
+                it shouldBe testArtistMatches
             }
         }
 
@@ -84,18 +75,16 @@ internal class RepositoryTest {
             coEvery {
                 mockApiService.getArtists(
                     any(),
-                    any(),
-                    any(),
                     any()
                 )
             } throws IOException()
 
             // act
-            val flowResult = repository.getArtistsSearchResult(testMethod, testArtist)
+            val flowResult = repository.getArtistsSearchResult(testArtist)
 
             // assert
             flowResult.collect {
-                it.isFailure.shouldBeTrue()
+                it shouldBe null
             }
         }
 
@@ -103,10 +92,9 @@ internal class RepositoryTest {
         fun `artist search retry emit success`() = testDispatcher.runBlockingTest {
             // arrange
             var shouldThrowError = true
+            every { mockkSearchResponse.results?.artistmatches } returns testArtistMatches
             coEvery {
                 mockApiService.getArtists(
-                    any(),
-                    any(),
                     any(),
                     any()
                 )
@@ -116,11 +104,11 @@ internal class RepositoryTest {
 
             pauseDispatcher {
                 // act
-                val flowResult = repository.getArtistsSearchResult(testMethod, testArtist)
+                val flowResult = repository.getArtistsSearchResult(testArtist)
                 // assert
                 launch {
                     flowResult.collect {
-                        it.isSuccess.shouldBeTrue()
+                        it shouldBe testArtistMatches
                     }
                 }
                 // 1st retry

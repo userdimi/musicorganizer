@@ -1,5 +1,6 @@
 package de.colognecode.musicorganizer.repository
 
+import de.colognecode.musicorganizer.di.DispatcherModule
 import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.Artistmatches
 import kotlinx.coroutines.CoroutineDispatcher
@@ -9,22 +10,20 @@ import javax.inject.Inject
 
 class Repository @Inject constructor(
     private val lastFMApiService: LastFMApiService,
-    private val apiKey: String,
-    private val format: String,
-    private val dispatcher: CoroutineDispatcher
+    @DispatcherModule.IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
 
     companion object {
         const val DELAY_ONE_SECOND = 1000L
+        private const val SEARCH_METHOD = "artist.search"
     }
 
     suspend fun getArtistsSearchResult(
-        method: String,
         artist: String
-    ): Flow<Result<Artistmatches?>> {
+    ): Flow<Artistmatches?> {
         return flow {
             val artistsSearchResults = lastFMApiService.getArtists(
-                method, artist, apiKey, format
+                SEARCH_METHOD, artist
             )
             emit(Result.success(artistsSearchResults.results?.artistmatches))
         }
@@ -36,6 +35,9 @@ class Repository @Inject constructor(
             .catch { throwable ->
                 emit(Result.failure(throwable))
             }
-            .flowOn(dispatcher)
+            .map {
+                it.getOrNull()
+            }
+            .flowOn(ioDispatcher)
     }
 }
