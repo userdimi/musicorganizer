@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
 
 class FavoriteAlbumsFragment : Fragment() {
 
@@ -33,7 +34,7 @@ class FavoriteAlbumsFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                DefaultPreview()
+                FavoriteAlbums()
             }
         }
     }
@@ -45,25 +46,19 @@ class FavoriteAlbumsFragment : Fragment() {
     }
 
     @Preview
-    @Composable
-    fun DefaultPreview() {
-        FavoriteAlbumsLayout()
-    }
-
     @Composable()
-    fun FavoriteAlbumsLayout() {
-        AppTopBar()
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            NoFavoriteAlbumsMessage()
+    fun FavoriteAlbums() {
+        MusicOrganizerTheme {
+            Scaffold(
+                topBar = { AppBar() },
+                content = { Content() }
+            )
         }
     }
 
     @Preview
     @Composable
-    fun AppTopBar() {
+    fun AppBar() {
         TopAppBar(
             title = { Text(text = "Favorite Albums") },
             actions = {
@@ -79,6 +74,18 @@ class FavoriteAlbumsFragment : Fragment() {
                 }
             }
         )
+    }
+
+    @Preview
+    @Composable
+    fun Content() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            NoFavoriteAlbumsMessage()
+        }
     }
 
     @Preview
@@ -102,7 +109,7 @@ class FavoriteAlbumsFragment : Fragment() {
             Text(
                 text = "Lets start a search add some albums of your favorite artists.",
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.caption
             )
         }
     }
