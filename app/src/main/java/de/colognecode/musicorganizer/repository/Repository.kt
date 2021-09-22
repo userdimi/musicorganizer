@@ -20,7 +20,7 @@ class Repository @Inject constructor(
 
     suspend fun getArtistsSearchResult(
         artist: String
-    ): Flow<Artistmatches?> {
+    ): Flow<Artistmatches> {
         return flow {
             val artistsSearchResults = lastFMApiService.getArtists(
                 SEARCH_METHOD, artist
@@ -35,7 +35,7 @@ class Repository @Inject constructor(
             .catch { throwable ->
                 emit(Result.failure(throwable))
             }
-            .map {
+            .mapNotNull {
                 it.getOrNull()
             }
             .flowOn(ioDispatcher)

@@ -21,14 +21,20 @@ class SearchViewModel @Inject constructor(private val repository: Repository) : 
     private val _isError = MutableLiveData<Boolean>()
     val isError: LiveData<Boolean> = _isError
 
+    private val _isProgressbarVisible = MutableLiveData<Boolean>()
+    val isProgressbarVisible = _isProgressbarVisible
+
     fun getSearchResults(artist: String) {
         viewModelScope.launch {
+            _isProgressbarVisible.value = true
             repository.getArtistsSearchResult(artist)
                 .catch {
                     _isError.value = true
+                    _isProgressbarVisible.postValue(false)
                 }
                 .collect {
-                    _artistsSearchResults.value = it?.artist
+                    _isProgressbarVisible.postValue(false)
+                    _artistsSearchResults.postValue(it.artist)
                 }
         }
     }

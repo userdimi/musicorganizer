@@ -12,7 +12,7 @@ interface LastFMApiService {
         private const val FORMAT = "json"
     }
 
-    @GET
+    @GET("2.0/")
     suspend fun getArtists(
         @Query("method") method: String,
         @Query("artist") artist: String,

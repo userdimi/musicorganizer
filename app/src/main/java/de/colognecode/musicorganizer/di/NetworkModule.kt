@@ -25,7 +25,7 @@ class NetworkModule {
     }
 
     @Provides
-    fun providesBaseUrl() = "http://ws.audioscrobbler.com/2.0/"
+    fun providesBaseUrl() = "https://ws.audioscrobbler.com/"
 
     @Provides
     fun provideOkHttpClient(): OkHttpClient {

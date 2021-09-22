@@ -24,7 +24,8 @@ private val LightColors = lightColors(
     onPrimary = White,
     secondary = Teal_200,
     secondaryVariant = Teal_700,
-    onSecondary = Black
+    onSecondary = Black,
+    onSurface = Black
 )
 
 private val DarkColors = darkColors(
@@ -33,5 +34,6 @@ private val DarkColors = darkColors(
     onPrimary = Black,
     secondary = Teal_200,
     secondaryVariant = Teal_200,
-    onSecondary = Black
+    onSecondary = Black,
+    onSurface = White
 )

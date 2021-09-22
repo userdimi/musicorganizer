@@ -4,7 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -17,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
 
 class FavoriteAlbumsFragment : Fragment() {
@@ -64,7 +68,10 @@ class FavoriteAlbumsFragment : Fragment() {
             actions = {
                 IconButton(
                     onClick = {
-                        // TODO: 18.09.21 display search widget  
+                        val action =
+                            FavoriteAlbumsFragmentDirections
+                                .actionFavoriteAlbumsFragmentToSearchFragment()
+                        findNavController().navigate(action)
                     }
                 ) {
                     Icon(
