@@ -19,11 +19,14 @@ class Repository @Inject constructor(
     }
 
     suspend fun getArtistsSearchResult(
-        artist: String
+        artist: String,
+        page: Int
     ): Flow<Artistmatches> {
         return flow {
             val artistsSearchResults = lastFMApiService.getArtists(
-                SEARCH_METHOD, artist
+                method = SEARCH_METHOD,
+                artist = artist,
+                page = page
             )
             emit(Result.success(artistsSearchResults.results?.artistmatches))
         }

@@ -5,9 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -56,23 +57,30 @@ class SearchFragment : Fragment() {
             setContent {
                 val isProgressbarVisible by viewModel.isProgressbarVisible.observeAsState(false)
                 val artistsSearchResults by viewModel.artistsSearchResults.observeAsState(initial = emptyList())
+                val artistsSearchResultPage by viewModel.page
                 ArtistsSearch(
                     isProgressbarVisible = isProgressbarVisible,
-                    artistSearchResults = artistsSearchResults
+                    artistSearchResults = artistsSearchResults,
+                    artistsSearchResultPage = artistsSearchResultPage
                 )
             }
         }
     }
 
     @Composable
-    fun ArtistsSearch(isProgressbarVisible: Boolean?, artistSearchResults: List<ArtistItem?>?) {
+    fun ArtistsSearch(
+        isProgressbarVisible: Boolean?,
+        artistSearchResults: List<ArtistItem?>?,
+        artistsSearchResultPage: Int
+    ) {
         MusicOrganizerTheme {
             Scaffold(
                 topBar = { AppBar() },
                 content = {
                     Content(
                         isProgressbarVisible = isProgressbarVisible,
-                        artistSearchResults = artistSearchResults
+                        artistSearchResults = artistSearchResults,
+                        artistsSearchResultPage = artistsSearchResultPage
                     )
                 }
             )
@@ -100,16 +108,21 @@ class SearchFragment : Fragment() {
     }
 
     @Composable
-    fun Content(isProgressbarVisible: Boolean?, artistSearchResults: List<ArtistItem?>?) {
+    fun Content(
+        isProgressbarVisible: Boolean?,
+        artistSearchResults: List<ArtistItem?>?,
+        artistsSearchResultPage: Int
+    ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             SearchBar()
-            if (isProgressbarVisible == true) {
-                LoadingSpinner()
-            } else {
-                ArtistsSearchResults(artistSearchResults = artistSearchResults)
-            }
+            ArtistsSearchResults(
+                artistSearchResults = artistSearchResults,
+                isProgressbarVisible = isProgressbarVisible,
+                artistsSearchResultPage = artistsSearchResultPage
+
+            )
         }
     }
 
@@ -178,29 +191,51 @@ class SearchFragment : Fragment() {
 
 
     @Composable
-    fun ArtistsSearchResults(artistSearchResults: List<ArtistItem?>?) {
-        artistSearchResults?.let {
-            LazyColumn(
-                contentPadding = PaddingValues(8.dp, vertical = 8.dp),
-                //verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(
-                    items = artistSearchResults, itemContent = { artistSearchResultItem ->
-                        var imageUrl = ""
-                        artistSearchResultItem?.image?.let { imageItems ->
-                            imageUrl = imageItems.find { imageItem ->
-                                imageItem?.size == "extralarge"
-                            }?.text ?: ""
+    fun ArtistsSearchResults(
+        artistSearchResults: List<ArtistItem?>?,
+        artistsSearchResultPage: Int,
+        isProgressbarVisible: Boolean?
+    ) {
+        Box(
+            modifier = Modifier
+                .background(color = MaterialTheme.colors.surface)
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            artistSearchResults?.let {
+                if (isProgressbarVisible == true && artistSearchResults.isEmpty()) {
+                    LoadingSpinner()
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(8.dp, vertical = 8.dp),
+                    ) {
+                        itemsIndexed(
+                            items = artistSearchResults
+                        ) { index: Int, artistSearchResultItem: ArtistItem? ->
+                            var imageUrl = ""
+                            artistSearchResultItem?.image?.let { imageItems ->
+                                imageUrl = imageItems.find { imageItem ->
+                                    imageItem?.size == "extralarge"
+                                }?.text ?: ""
+                            }
+                            this@SearchFragment.viewModel.onArtistSearchResultScrollPositionChanged(
+                                position = index
+                            )
+                            if ((index + 1) >= (artistsSearchResultPage * SearchViewModel.ARTIST_SEARCH_RESULT_PAGE_SIZE) && isProgressbarVisible == false) {
+                                this@SearchFragment.viewModel.getNextPageSearchResults("cher")
+                            }
+                            ArtistSearchResultCard(
+                                artistImageUrl = imageUrl,
+                                artistName = artistSearchResultItem?.name,
+                                artistInfoUrl = artistSearchResultItem?.url
+                            )
                         }
-                        ArtistSearchResultCard(
-                            artistImageUrl = imageUrl,
-                            artistName = artistSearchResultItem?.name,
-                            artistInfoUrl = artistSearchResultItem?.url
-                        )
                     }
-                )
+                }
             }
-
+            if (isProgressbarVisible == true) {
+                LoadingSpinner()
+            }
         }
     }
 
@@ -253,7 +288,7 @@ class SearchFragment : Fragment() {
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface,
 
-                    )
+                        )
                 }
             }
         }

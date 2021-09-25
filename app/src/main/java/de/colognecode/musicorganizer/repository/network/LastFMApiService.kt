@@ -16,6 +16,7 @@ interface LastFMApiService {
     suspend fun getArtists(
         @Query("method") method: String,
         @Query("artist") artist: String,
+        @Query("page") page: Int,
         @Query("api_key") apiKey: String = API_KEY,
         @Query("format") format: String = FORMAT
     ): ArtistSearchResponse
