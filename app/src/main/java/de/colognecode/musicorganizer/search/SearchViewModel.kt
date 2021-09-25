@@ -30,11 +30,11 @@ class SearchViewModel @Inject constructor(private val repository: Repository) : 
             repository.getArtistsSearchResult(artist)
                 .catch {
                     _isError.value = true
-                    _isProgressbarVisible.postValue(false)
+                    _isProgressbarVisible.value = false
                 }
                 .collect {
-                    _isProgressbarVisible.postValue(false)
-                    _artistsSearchResults.postValue(it.artist)
+                    _isProgressbarVisible.value = false
+                    _artistsSearchResults.value = it.artist
                 }
         }
     }
