@@ -158,6 +158,5 @@ internal class SearchViewModelTest {
         searchViewModel.getNextPageSearchResults(testArtist)
         delay(1000)
         searchViewModel.artistsSearchResults.value?.size.shouldBe(4)
-
     }
 }
