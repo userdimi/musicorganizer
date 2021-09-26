@@ -26,6 +26,7 @@ internal class RepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val mockApiService = mockk<LastFMApiService>(relaxed = true)
     private val mockkSearchResponse = mockk<ArtistSearchResponse>(relaxed = true)
+    private val testPage = 1
     private val testArtist = "testArtist"
     private val testArtistItem1 = ArtistItem(
         listOf(),
@@ -56,12 +57,13 @@ internal class RepositoryTest {
             coEvery {
                 mockApiService.getArtists(
                     any(),
+                    any(),
                     any()
                 )
             } returns mockkSearchResponse
 
             // act
-            val flowResult = repository.getArtistsSearchResult(testArtist)
+            val flowResult = repository.getArtistsSearchResult(testArtist, testPage)
 
             // assert
             flowResult.collect {
@@ -75,12 +77,13 @@ internal class RepositoryTest {
             coEvery {
                 mockApiService.getArtists(
                     any(),
+                    any(),
                     any()
                 )
             } throws IOException()
 
             // act
-            val flowResult = repository.getArtistsSearchResult(testArtist)
+            val flowResult = repository.getArtistsSearchResult(testArtist, testPage)
 
             // assert
             flowResult.collect {
@@ -96,6 +99,7 @@ internal class RepositoryTest {
             coEvery {
                 mockApiService.getArtists(
                     any(),
+                    any(),
                     any()
                 )
             } answers {
@@ -104,7 +108,7 @@ internal class RepositoryTest {
 
             pauseDispatcher {
                 // act
-                val flowResult = repository.getArtistsSearchResult(testArtist)
+                val flowResult = repository.getArtistsSearchResult(testArtist, testPage)
                 // assert
                 launch {
                     flowResult.collect {

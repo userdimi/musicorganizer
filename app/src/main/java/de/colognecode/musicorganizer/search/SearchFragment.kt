@@ -38,6 +38,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
 import de.colognecode.musicorganizer.repository.network.model.ArtistItem
+import de.colognecode.musicorganizer.search.SearchViewModel.Companion.ARTIST_SEARCH_RESULT_PAGE_SIZE
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
 import de.colognecode.musicorganizer.theme.Purple_700
 
@@ -56,7 +57,9 @@ class SearchFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val isProgressbarVisible by viewModel.isProgressbarVisible.observeAsState(false)
-                val artistsSearchResults by viewModel.artistsSearchResults.observeAsState(initial = emptyList())
+                val artistsSearchResults by viewModel.artistsSearchResults.observeAsState(
+                    initial = emptyList()
+                )
                 val artistsSearchResultPage by viewModel.page
                 ArtistsSearch(
                     isProgressbarVisible = isProgressbarVisible,
@@ -126,7 +129,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-
     @ExperimentalComposeUiApi
     @Preview
     @Composable
@@ -189,7 +191,6 @@ class SearchFragment : Fragment() {
         }
     }
 
-
     @Composable
     fun ArtistsSearchResults(
         artistSearchResults: List<ArtistItem?>?,
@@ -221,7 +222,10 @@ class SearchFragment : Fragment() {
                             this@SearchFragment.viewModel.onArtistSearchResultScrollPositionChanged(
                                 position = index
                             )
-                            if ((index + 1) >= (artistsSearchResultPage * SearchViewModel.ARTIST_SEARCH_RESULT_PAGE_SIZE) && isProgressbarVisible == false) {
+                            if ((index + 1) >=
+                                (artistsSearchResultPage * ARTIST_SEARCH_RESULT_PAGE_SIZE) &&
+                                isProgressbarVisible == false
+                            ) {
                                 this@SearchFragment.viewModel.getNextPageSearchResults("cher")
                             }
                             ArtistSearchResultCard(
@@ -255,7 +259,6 @@ class SearchFragment : Fragment() {
         )
     }
 
-    //@Preview
     @Composable
     fun ArtistSearchResultCard(
         artistImageUrl: String?,
@@ -287,11 +290,9 @@ class SearchFragment : Fragment() {
                         text = "More Info: $artistInfoUrl",
                         style = MaterialTheme.typography.caption,
                         color = MaterialTheme.colors.onSurface,
-
-                        )
+                    )
                 }
             }
         }
     }
 }
-
