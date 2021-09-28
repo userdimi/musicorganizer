@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -267,7 +268,19 @@ class SearchFragment : Fragment() {
     ) {
         Card(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .padding(
+                    horizontal = 8.dp,
+                    vertical = 8.dp
+                )
+                .clickable(
+                    onClick = {
+                        val action =
+                            SearchFragmentDirections.actionSearchFragmentToTopAlbumsFragment(
+                                artistName
+                            )
+                        findNavController().navigate(action)
+                    }
+                )
                 .fillMaxWidth(),
             shape = RoundedCornerShape(corner = CornerSize(16.dp)),
             elevation = 2.dp,

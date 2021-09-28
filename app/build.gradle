@@ -80,8 +80,6 @@ dependencies {
 
     def material_version = '1.4.0'
     implementation "com.google.android.material:material:$material_version"
-    def compose_constraint_layout_version = '1.0.0-beta02'
-    implementation "androidx.constraintlayout:constraintlayout-compose:$compose_constraint_layout_version"
 
     // Navigation
     def navigation_component_version = "2.3.5"
