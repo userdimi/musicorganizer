@@ -56,8 +56,10 @@ class SearchViewModel @Inject constructor(private val repository: Repository) : 
 
     fun getNextPageSearchResults(artist: String) {
         viewModelScope.launch {
-            if ((artistsSearchResultsScrollPosition + 1) >= (page.value * ARTIST_SEARCH_RESULT_PAGE_SIZE) )
-            _isProgressbarVisible.value = true
+            if ((artistsSearchResultsScrollPosition + 1) >=
+                (page.value * ARTIST_SEARCH_RESULT_PAGE_SIZE)
+            )
+                _isProgressbarVisible.value = true
             incrementPage()
             Log.d(TAG, "nextPage: triggered: ${page.value}")
             delay(1000)
