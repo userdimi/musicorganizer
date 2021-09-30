@@ -46,7 +46,7 @@ class Repository @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
-    fun getTopAlbums(artist: String, page: Int): Flow<TopAlbums?> {
+    suspend fun getTopAlbums(artist: String, page: Int): Flow<TopAlbums?> {
         return flow {
             val topAlbumsResponse = lastFMApiService.getTopAlbums(
                 method = TOP_ALBUMS_METHOD,
@@ -55,6 +55,14 @@ class Repository @Inject constructor(
             )
             emit(Result.success(topAlbumsResponse.topAlbums))
         }
+            .retry(2) { throwable ->
+                (throwable is Exception).also { isException ->
+                    if (isException) delay(DELAY_ONE_SECOND)
+                }
+            }
+            .catch { throwable ->
+                emit(Result.failure(throwable))
+            }
             .mapNotNull {
                 it.getOrNull()
             }

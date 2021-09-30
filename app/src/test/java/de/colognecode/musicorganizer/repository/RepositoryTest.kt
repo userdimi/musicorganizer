@@ -6,7 +6,6 @@ import de.colognecode.musicorganizer.repository.network.model.*
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -131,7 +130,6 @@ internal class RepositoryTest {
     inner class TopAlbumsTest {
         private val mockTopAlbumsResponse = mockk<TopAlbumsResponse>(relaxed = true)
         private val mockArtist = mockk<Artist>(relaxed = true)
-        private val mockTopAlbumAttr = mockk<TopAlbumAttr>(relaxed = true)
         private val testAlbumItem1 = AlbumItem(
             topAlbumsImage = listOf(),
             artist = mockArtist,
@@ -171,6 +169,58 @@ internal class RepositoryTest {
                 it?.album.shouldBe(testTopAlbums)
                 it?.album?.shouldContain(testAlbumItem1)
                 it?.album?.shouldContain(testAlbumItem2)
+            }
+        }
+
+        @Test
+        fun `top albums emit error`() = testDispatcher.runBlockingTest {
+            // arrange
+            coEvery {
+                mockApiService.getTopAlbums(
+                    any(),
+                    any(),
+                    any()
+                )
+            } throws IOException()
+
+            // act
+            val flowResult = repository.getTopAlbums(testArtist, testPage)
+
+            // assert
+            flowResult.collect {
+                it shouldBe null
+            }
+        }
+
+        @Test
+        fun `top albums retry emit success`() = testDispatcher.runBlockingTest {
+            // arrange
+            var shouldThrowError = true
+            every { mockTopAlbumsResponse.topAlbums.album } returns testTopAlbums
+            coEvery {
+                mockApiService.getTopAlbums(
+                    any(),
+                    any(),
+                    any()
+                )
+            } answers {
+                if (shouldThrowError) throw IOException() else mockTopAlbumsResponse
+            }
+
+            pauseDispatcher {
+                // act
+                val flowResult = repository.getTopAlbums(testArtist, testPage)
+                // assert
+                launch {
+                    flowResult.collect {
+                        it?.album shouldBe testTopAlbums
+                    }
+                }
+                // 1st retry
+                advanceTimeBy(DELAY_ONE_SECOND)
+                // 2st retry
+                shouldThrowError = false
+                advanceTimeBy(DELAY_ONE_SECOND)
             }
         }
     }

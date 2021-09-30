@@ -21,12 +21,9 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import java.io.IOException
 
 @ExperimentalCoroutinesApi
-@RunWith(JUnit4::class)
 internal class SearchViewModelTest {
 
     @get:Rule
