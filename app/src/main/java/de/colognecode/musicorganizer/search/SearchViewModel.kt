@@ -30,25 +30,25 @@ class SearchViewModel @Inject constructor(private val repository: Repository) : 
     private val _isError = MutableLiveData<Boolean>()
     val isError: LiveData<Boolean> = _isError
 
-    private val _isProgressbarVisible = MutableLiveData<Boolean>()
-    val isProgressbarVisible = _isProgressbarVisible
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading = _isLoading
 
     val page = mutableStateOf(START_PAGE_INDEX)
     private var artistsSearchResultsScrollPosition = 0
 
     fun getSearchResults(artist: String) {
         viewModelScope.launch {
-            _isProgressbarVisible.value = true
+            _isLoading.value = true
             repository.getArtistsSearchResult(
                 artist = artist,
                 page = START_PAGE_INDEX
             )
                 .catch {
                     _isError.value = true
-                    _isProgressbarVisible.value = false
+                    _isLoading.value = false
                 }
                 .collect {
-                    _isProgressbarVisible.value = false
+                    _isLoading.value = false
                     _artistsSearchResults.value = it.artist
                 }
         }
@@ -59,7 +59,7 @@ class SearchViewModel @Inject constructor(private val repository: Repository) : 
             if ((artistsSearchResultsScrollPosition + 1) >=
                 (page.value * ARTIST_SEARCH_RESULT_PAGE_SIZE)
             )
-                _isProgressbarVisible.value = true
+                _isLoading.value = true
             incrementPage()
             Log.d(TAG, "nextPage: triggered: ${page.value}")
             delay(1000)
@@ -70,10 +70,10 @@ class SearchViewModel @Inject constructor(private val repository: Repository) : 
                 )
                     .catch {
                         _isError.value = true
-                        _isProgressbarVisible.value = false
+                        _isLoading.value = false
                     }
                     .collect {
-                        _isProgressbarVisible.value = false
+                        _isLoading.value = false
                         appendNewArtistsSearchResults(it.artist)
                     }
             }

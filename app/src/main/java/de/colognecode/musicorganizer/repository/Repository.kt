@@ -17,7 +17,7 @@ class Repository @Inject constructor(
     companion object {
         const val DELAY_ONE_SECOND = 1000L
         private const val SEARCH_METHOD = "artist.search"
-        private const val TOP_ALBUMS_METHOD = "artist"
+        private const val TOP_ALBUMS_METHOD = "artist.gettopalbums"
     }
 
     suspend fun getArtistsSearchResult(
