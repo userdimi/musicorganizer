@@ -246,9 +246,10 @@ class TopAlbumsFragment : Fragment() {
                             )
                         }
                         Image(
+                            modifier = Modifier.fillMaxWidth(),
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Add to favorite albums",
-                            alignment = Alignment.CenterEnd,
+                            alignment = Alignment.BottomEnd,
                             colorFilter = ColorFilter.tint(
                                 color = Color.LightGray
                             )
