@@ -49,6 +49,7 @@ import de.colognecode.musicorganizer.uicomponents.MusicOrganizerLoadingSpinner
 class SearchFragment : Fragment() {
 
     private val viewModel: SearchViewModel by viewModels()
+    private var artist = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -143,6 +144,7 @@ class SearchFragment : Fragment() {
             onValueChange = {
                 searchText = it
                 searchHintText = it
+                artist = it
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -213,7 +215,7 @@ class SearchFragment : Fragment() {
                                 (artistsSearchResultPage * ARTIST_SEARCH_RESULT_PAGE_SIZE) &&
                                 isProgressbarVisible == false
                             ) {
-                                this@SearchFragment.viewModel.getNextPageSearchResults("cher")
+                                this@SearchFragment.viewModel.getNextPageSearchResults(artist)
                             }
                             ArtistSearchResultCard(
                                 artistImageUrl = imageUrl,

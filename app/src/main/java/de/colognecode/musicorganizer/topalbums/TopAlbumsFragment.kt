@@ -17,12 +17,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,7 @@ class TopAlbumsFragment : Fragment() {
 
     private val viewModel: TopAlbumsViewModel by viewModels()
     private val args: TopAlbumsFragmentArgs by navArgs()
+    private var artist = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,11 +55,12 @@ class TopAlbumsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
-            val artist = args.artist
-            viewModel.getTopAlbums(artist ?: "")
+            artist = args.artist ?: ""
+            viewModel.getTopAlbums(artist)
             setContent {
                 val isLoading by viewModel.isLoading.observeAsState(false)
                 val topAlbums by viewModel.topAlbums.observeAsState(initial = emptyList())
+                val topAlbumsPage by viewModel.page
                 if (artist.isNullOrEmpty()) {
                     Snackbar {
                         Text(text = "Error, no artist provided.")
@@ -64,7 +69,8 @@ class TopAlbumsFragment : Fragment() {
                 TopAlbums(
                     artist = artist,
                     isLoading = isLoading,
-                    topAlbums = topAlbums
+                    topAlbums = topAlbums,
+                    topAlbumsPage = topAlbumsPage
                 )
             }
         }
@@ -74,7 +80,8 @@ class TopAlbumsFragment : Fragment() {
     fun TopAlbums(
         artist: String?,
         topAlbums: List<AlbumItem>,
-        isLoading: Boolean?
+        isLoading: Boolean?,
+        topAlbumsPage: Int
     ) {
         MusicOrganizerTheme {
             Scaffold(
@@ -82,7 +89,8 @@ class TopAlbumsFragment : Fragment() {
                 content = {
                     ContentTopAlbums(
                         isLoading = isLoading,
-                        topAlbums = topAlbums
+                        topAlbums = topAlbums,
+                        topAlbumsPage = topAlbumsPage
                     )
                 }
             )
@@ -119,14 +127,16 @@ class TopAlbumsFragment : Fragment() {
     @Composable
     fun ContentTopAlbums(
         isLoading: Boolean?,
-        topAlbums: List<AlbumItem>
+        topAlbums: List<AlbumItem>,
+        topAlbumsPage: Int
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             TopAlbums(
                 isLoading = isLoading,
-                topAlbums = topAlbums
+                topAlbums = topAlbums,
+                topAlbumsPage = topAlbumsPage
             )
         }
     }
@@ -134,7 +144,8 @@ class TopAlbumsFragment : Fragment() {
     @Composable
     fun TopAlbums(
         isLoading: Boolean?,
-        topAlbums: List<AlbumItem>
+        topAlbums: List<AlbumItem>,
+        topAlbumsPage: Int
     ) {
         if (isLoading == true && topAlbums.isEmpty()) {
             MusicOrganizerLoadingSpinner.LoadingSpinnerComposable()
@@ -154,6 +165,17 @@ class TopAlbumsFragment : Fragment() {
                                 imageItem.size == "large"
                             }?.text ?: ""
                         }
+                        this@TopAlbumsFragment.viewModel.onTopAlbumScrollPositionChanged(
+                            position = index
+                        )
+                        if ((index + 1) >=
+                            (topAlbumsPage * TopAlbumsViewModel.TOP_ALBUM_PAGE_SIZE) &&
+                            isLoading == false
+                        ) {
+                            this@TopAlbumsFragment.viewModel.getNextPageOfTopAlbums(
+                                artist = artist
+                            )
+                        }
                         AlbumCard(
                             imageUrl = imageUrl,
                             albumName = album.name,
@@ -162,6 +184,9 @@ class TopAlbumsFragment : Fragment() {
                         )
                     }
                 }
+            }
+            if (isLoading == true) {
+                MusicOrganizerLoadingSpinner.LoadingSpinnerComposable()
             }
         }
     }
@@ -205,18 +230,28 @@ class TopAlbumsFragment : Fragment() {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.BottomStart
                 ) {
-                    Column {
-                        Text(
-                            text = artist,
-                            maxLines = 2,
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.onSurface
-                        )
-                        Text(
-                            text = "Playcount: $playCount",
-                            maxLines = 2,
-                            style = MaterialTheme.typography.caption,
-                            color = MaterialTheme.colors.onSurface
+                    Row {
+                        Column {
+                            Text(
+                                text = artist,
+                                maxLines = 2,
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.onSurface
+                            )
+                            Text(
+                                text = "Playcount: $playCount",
+                                maxLines = 2,
+                                style = MaterialTheme.typography.caption,
+                                color = MaterialTheme.colors.onSurface
+                            )
+                        }
+                        Image(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Add to favorite albums",
+                            alignment = Alignment.CenterEnd,
+                            colorFilter = ColorFilter.tint(
+                                color = Color.LightGray
+                            )
                         )
                     }
                 }
