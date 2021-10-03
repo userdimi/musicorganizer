@@ -7,7 +7,7 @@ import de.colognecode.musicorganizer.repository.network.model.AlbumItem
 import de.colognecode.musicorganizer.repository.network.model.Artist
 import de.colognecode.musicorganizer.repository.network.model.TopAlbumAttr
 import de.colognecode.musicorganizer.repository.network.model.TopAlbums
-import de.colognecode.musicorganizer.util.CoroutineTestRule
+import de.colognecode.musicorganizer.utils.testing.CoroutineTestRule
 import io.kotest.matchers.collections.shouldContain
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -16,7 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException

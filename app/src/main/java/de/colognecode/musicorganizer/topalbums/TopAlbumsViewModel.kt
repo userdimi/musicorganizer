@@ -59,7 +59,9 @@ class TopAlbumsViewModel @Inject constructor(private val repository: Repository)
 
     fun getNextPageOfTopAlbums(artist: String) {
         viewModelScope.launch {
-            if (page.value <= totalPages && (topAlbumsScrollPosition + 1) >= page.value * TOP_ALBUM_PAGE_SIZE) {
+            if (page.value <= totalPages && (topAlbumsScrollPosition + 1) >=
+                page.value * TOP_ALBUM_PAGE_SIZE
+            ) {
                 _isLoading.value = true
                 incrementPage()
                 delay(1000)
