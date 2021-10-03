@@ -3,19 +3,22 @@ package de.colognecode.musicorganizer.topalbums
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import de.colognecode.musicorganizer.repository.Repository
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.model.AlbumItem
 import de.colognecode.musicorganizer.repository.network.model.Artist
 import de.colognecode.musicorganizer.repository.network.model.TopAlbumAttr
 import de.colognecode.musicorganizer.repository.network.model.TopAlbums
-import de.colognecode.musicorganizer.utils.testing.CoroutineTestRule
+import de.colognecode.musicorganizer.util.CoroutineTestRule
 import io.kotest.matchers.collections.shouldContain
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
@@ -34,6 +37,7 @@ class TopAlbumsViewModelTest {
     private val mockIsLoading = mockk<Observer<Boolean>>(relaxed = true)
     private val mockRepository = mockk<Repository>(relaxed = true)
     private val mockArtist = mockk<Artist>(relaxed = true)
+    private val mockFavoriteAlbum = mockk<FavoriteAlbum>(relaxed = true)
     private val testArtist = "TestArtist"
     private val testPage = 1
     private val testAlbumItem1 = AlbumItem(
@@ -117,5 +121,14 @@ class TopAlbumsViewModelTest {
         // assert
         verify { mockIsErrorObserver.onChanged(true) }
         verify { mockIsLoading.onChanged(false) }
+    }
+
+    @Test
+    fun `should saved album as favorite`() = rule.dispatcher.runBlockingTest {
+        // act
+        topAlbumsViewModel.saveAlbumAsFavorite(mockFavoriteAlbum)
+
+        // assert
+        coVerify { mockRepository.saveFavoriteAlbumToDatabase(mockFavoriteAlbum) }
     }
 }

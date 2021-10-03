@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.colognecode.musicorganizer.repository.Repository
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.model.AlbumItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
@@ -101,5 +102,11 @@ class TopAlbumsViewModel @Inject constructor(private val repository: Repository)
 
     fun onTopAlbumScrollPositionChanged(position: Int) {
         this.topAlbumsScrollPosition = position
+    }
+
+    fun saveAlbumAsFavorite(favoriteAlbum: FavoriteAlbum) {
+        viewModelScope.launch {
+            repository.saveFavoriteAlbumToDatabase(favoriteAlbum)
+        }
     }
 }

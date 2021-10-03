@@ -36,6 +36,7 @@ import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.model.AlbumItem
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
 import de.colognecode.musicorganizer.uicomponents.MusicOrganizerLoadingSpinner
@@ -177,10 +178,11 @@ class TopAlbumsFragment : Fragment() {
                             )
                         }
                         AlbumCard(
-                            imageUrl = imageUrl,
+                            albumImageUrl = imageUrl,
                             albumName = album.name,
-                            artist = album.artist.name,
-                            playCount = album.playcount
+                            artistName = album.artist.name,
+                            playCount = album.playcount,
+                            mbid = album.mbid
                         )
                     }
                 }
@@ -193,10 +195,11 @@ class TopAlbumsFragment : Fragment() {
 
     @Composable
     fun AlbumCard(
-        imageUrl: String,
+        albumImageUrl: String,
         albumName: String,
-        artist: String,
-        playCount: Int
+        artistName: String,
+        playCount: Int,
+        mbid: String
     ) {
         Card(
             modifier = Modifier
@@ -219,7 +222,7 @@ class TopAlbumsFragment : Fragment() {
                     .padding(8.dp)
                     .fillMaxSize()
             ) {
-                AlbumImage(albumUrl = imageUrl)
+                AlbumImage(albumUrl = albumImageUrl)
                 Text(
                     text = albumName,
                     maxLines = 2,
@@ -233,7 +236,7 @@ class TopAlbumsFragment : Fragment() {
                     Row {
                         Column {
                             Text(
-                                text = artist,
+                                text = artistName,
                                 maxLines = 2,
                                 style = MaterialTheme.typography.body1,
                                 color = MaterialTheme.colors.onSurface
@@ -246,7 +249,22 @@ class TopAlbumsFragment : Fragment() {
                             )
                         }
                         Image(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    onClick = {
+                                        val favoriteAlbum = FavoriteAlbum(
+                                            mbid = mbid,
+                                            albumImageUrl = albumImageUrl,
+                                            albumName = albumName,
+                                            artistName = artistName,
+                                            playCount = playCount
+                                        )
+                                        this@TopAlbumsFragment.viewModel.saveAlbumAsFavorite(
+                                            favoriteAlbum = favoriteAlbum
+                                        )
+                                    }
+                                ),
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Add to favorite albums",
                             alignment = Alignment.BottomEnd,

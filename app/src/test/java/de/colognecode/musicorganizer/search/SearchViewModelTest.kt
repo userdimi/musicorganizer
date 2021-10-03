@@ -5,7 +5,7 @@ import androidx.lifecycle.Observer
 import de.colognecode.musicorganizer.repository.Repository
 import de.colognecode.musicorganizer.repository.network.model.ArtistItem
 import de.colognecode.musicorganizer.repository.network.model.Artistmatches
-import de.colognecode.musicorganizer.utils.testing.CoroutineTestRule
+import de.colognecode.musicorganizer.util.CoroutineTestRule
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
@@ -17,6 +17,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test

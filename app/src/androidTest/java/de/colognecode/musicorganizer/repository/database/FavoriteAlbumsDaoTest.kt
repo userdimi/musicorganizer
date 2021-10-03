@@ -46,7 +46,7 @@ class FavoriteAlbumsDaoTest {
             .setTransactionExecutor(rule.dispatcher.asExecutor())
             .setQueryExecutor(rule.dispatcher.asExecutor())
             .build()
-        favoriteAlbumsDao = database.topAlbumsDao()
+        favoriteAlbumsDao = database.favoriteAlbumsDao()
     }
 
     @After

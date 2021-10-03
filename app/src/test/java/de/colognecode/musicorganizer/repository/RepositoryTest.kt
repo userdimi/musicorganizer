@@ -1,12 +1,15 @@
 package de.colognecode.musicorganizer.repository
 
 import de.colognecode.musicorganizer.repository.Repository.Companion.DELAY_ONE_SECOND
+import de.colognecode.musicorganizer.repository.database.daos.FavoriteAlbumsDao
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.*
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,9 +28,11 @@ internal class RepositoryTest {
 
     private val testDispatcher = TestCoroutineDispatcher()
     private val mockApiService = mockk<LastFMApiService>(relaxed = true)
+    private val mockFavoriteAlbum = mockk<FavoriteAlbum>(relaxed = true)
+    private val mockFavoriteAlbumDao = mockk<FavoriteAlbumsDao>(relaxed = true)
     private val testPage = 1
     private val testArtist = "testArtist"
-    private val repository = Repository(mockApiService, testDispatcher)
+    private val repository = Repository(mockApiService, testDispatcher, mockFavoriteAlbumDao)
 
     @Nested
     inner class ArtistSearchTest {
@@ -222,6 +227,19 @@ internal class RepositoryTest {
                 shouldThrowError = false
                 advanceTimeBy(DELAY_ONE_SECOND)
             }
+        }
+    }
+
+    @Nested
+    inner class FavoriteAlbumTest {
+
+        @Test
+        fun `should save favorite album to database`() = testDispatcher.runBlockingTest {
+            // act
+            repository.saveFavoriteAlbumToDatabase(mockFavoriteAlbum)
+
+            // assert
+            coVerify { mockFavoriteAlbumDao.saveFavoriteAlbum(mockFavoriteAlbum) }
         }
     }
 }

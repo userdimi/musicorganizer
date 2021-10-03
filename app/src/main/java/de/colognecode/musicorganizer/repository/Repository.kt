@@ -1,6 +1,8 @@
 package de.colognecode.musicorganizer.repository
 
 import de.colognecode.musicorganizer.di.DispatcherModule
+import de.colognecode.musicorganizer.repository.database.daos.FavoriteAlbumsDao
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.Artistmatches
 import de.colognecode.musicorganizer.repository.network.model.TopAlbums
@@ -11,7 +13,8 @@ import javax.inject.Inject
 
 class Repository @Inject constructor(
     private val lastFMApiService: LastFMApiService,
-    @DispatcherModule.IoDispatcher private val ioDispatcher: CoroutineDispatcher
+    @DispatcherModule.IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val favoriteAlbumsDao: FavoriteAlbumsDao
 ) {
 
     companion object {
@@ -67,5 +70,9 @@ class Repository @Inject constructor(
                 it.getOrNull()
             }
             .flowOn(ioDispatcher)
+    }
+
+    suspend fun saveFavoriteAlbumToDatabase(favoriteAlbum: FavoriteAlbum) {
+        favoriteAlbumsDao.saveFavoriteAlbum(favoriteAlbum)
     }
 }
