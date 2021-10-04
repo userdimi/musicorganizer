@@ -8,6 +8,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,10 +39,10 @@ import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
+import de.colognecode.musicorganizer.components.MusicOrganizerLoadingSpinner
 import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.model.AlbumItem
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
-import de.colognecode.musicorganizer.uicomponents.MusicOrganizerLoadingSpinner
 
 @ExperimentalCoilApi
 @ExperimentalFoundationApi
@@ -248,7 +251,10 @@ class TopAlbumsFragment : Fragment() {
                                 color = MaterialTheme.colors.onSurface
                             )
                         }
-                        Image(
+                        val interactionSource = remember { MutableInteractionSource() }
+                        val isPressed by interactionSource.collectIsPressedAsState()
+                        val color = if (isPressed) Color.Red else Color.LightGray
+                        IconButton(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable(
@@ -269,7 +275,7 @@ class TopAlbumsFragment : Fragment() {
                             contentDescription = "Add to favorite albums",
                             alignment = Alignment.BottomEnd,
                             colorFilter = ColorFilter.tint(
-                                color = Color.LightGray
+                                color = color
                             )
                         )
                     }

@@ -41,7 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import de.colognecode.musicorganizer.repository.network.model.ArtistItem
 import de.colognecode.musicorganizer.search.SearchViewModel.Companion.ARTIST_SEARCH_RESULT_PAGE_SIZE
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
-import de.colognecode.musicorganizer.uicomponents.MusicOrganizerLoadingSpinner
+import de.colognecode.musicorganizer.components.MusicOrganizerLoadingSpinner
 
 @ExperimentalCoilApi
 @ExperimentalComposeUiApi

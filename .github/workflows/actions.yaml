@@ -9,11 +9,12 @@ defaults:
 jobs:
   build:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        api-level: [ 29,30 ]
     env:
       API_KEY: ${{ secrets.API_KEY }}
+    strategy:
+      matrix:
+        api-level: [ 29 ]
+
 
     steps:
       - name: Clone Repo
