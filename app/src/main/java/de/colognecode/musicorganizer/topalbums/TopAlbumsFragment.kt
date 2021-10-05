@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
@@ -256,28 +255,26 @@ class TopAlbumsFragment : Fragment() {
                         val color = if (isPressed) Color.Red else Color.LightGray
                         IconButton(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(
-                                    onClick = {
-                                        val favoriteAlbum = FavoriteAlbum(
-                                            mbid = mbid,
-                                            albumImageUrl = albumImageUrl,
-                                            albumName = albumName,
-                                            artistName = artistName,
-                                            playCount = playCount
-                                        )
-                                        this@TopAlbumsFragment.viewModel.saveAlbumAsFavorite(
-                                            favoriteAlbum = favoriteAlbum
-                                        )
-                                    }
-                                ),
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Add to favorite albums",
-                            alignment = Alignment.BottomEnd,
-                            colorFilter = ColorFilter.tint(
-                                color = color
+                                .fillMaxWidth(),
+                            onClick = {
+                                val favoriteAlbum = FavoriteAlbum(
+                                    mbid = mbid,
+                                    albumImageUrl = albumImageUrl,
+                                    albumName = albumName,
+                                    artistName = artistName,
+                                    playCount = playCount
+                                )
+                                this@TopAlbumsFragment.viewModel.saveAlbumAsFavorite(
+                                    favoriteAlbum = favoriteAlbum
+                                )
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = "Add to favorite albums",
+                                tint = Color.LightGray
                             )
-                        )
+                        }
                     }
                 }
             }
