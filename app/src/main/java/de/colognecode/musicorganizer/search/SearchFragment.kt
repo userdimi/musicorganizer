@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -40,7 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import de.colognecode.musicorganizer.repository.network.model.ArtistItem
 import de.colognecode.musicorganizer.search.SearchViewModel.Companion.ARTIST_SEARCH_RESULT_PAGE_SIZE
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
-import de.colognecode.musicorganizer.theme.Purple_700
+import de.colognecode.musicorganizer.components.MusicOrganizerLoadingSpinner
 
 @ExperimentalCoilApi
 @ExperimentalComposeUiApi
@@ -48,6 +49,7 @@ import de.colognecode.musicorganizer.theme.Purple_700
 class SearchFragment : Fragment() {
 
     private val viewModel: SearchViewModel by viewModels()
+    private var artist = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,7 +58,7 @@ class SearchFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val isProgressbarVisible by viewModel.isProgressbarVisible.observeAsState(false)
+                val isProgressbarVisible by viewModel.isLoading.observeAsState(false)
                 val artistsSearchResults by viewModel.artistsSearchResults.observeAsState(
                     initial = emptyList()
                 )
@@ -142,6 +144,7 @@ class SearchFragment : Fragment() {
             onValueChange = {
                 searchText = it
                 searchHintText = it
+                artist = it
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -177,20 +180,6 @@ class SearchFragment : Fragment() {
         )
     }
 
-    @Preview
-    @Composable
-    fun LoadingSpinner() {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CircularProgressIndicator(
-                color = Purple_700
-            )
-        }
-    }
-
     @Composable
     fun ArtistsSearchResults(
         artistSearchResults: List<ArtistItem?>?,
@@ -205,7 +194,7 @@ class SearchFragment : Fragment() {
         ) {
             artistSearchResults?.let {
                 if (isProgressbarVisible == true && artistSearchResults.isEmpty()) {
-                    LoadingSpinner()
+                    MusicOrganizerLoadingSpinner.LoadingSpinnerComposable()
                 } else {
                     LazyColumn(
                         contentPadding = PaddingValues(8.dp, vertical = 8.dp),
@@ -226,7 +215,7 @@ class SearchFragment : Fragment() {
                                 (artistsSearchResultPage * ARTIST_SEARCH_RESULT_PAGE_SIZE) &&
                                 isProgressbarVisible == false
                             ) {
-                                this@SearchFragment.viewModel.getNextPageSearchResults("cher")
+                                this@SearchFragment.viewModel.getNextPageSearchResults(artist)
                             }
                             ArtistSearchResultCard(
                                 artistImageUrl = imageUrl,
@@ -238,7 +227,7 @@ class SearchFragment : Fragment() {
                 }
             }
             if (isProgressbarVisible == true) {
-                LoadingSpinner()
+                MusicOrganizerLoadingSpinner.LoadingSpinnerComposable()
             }
         }
     }
@@ -267,7 +256,19 @@ class SearchFragment : Fragment() {
     ) {
         Card(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .padding(
+                    horizontal = 8.dp,
+                    vertical = 8.dp
+                )
+                .clickable(
+                    onClick = {
+                        val action =
+                            SearchFragmentDirections.actionSearchFragmentToTopAlbumsFragment(
+                                artistName
+                            )
+                        findNavController().navigate(action)
+                    }
+                )
                 .fillMaxWidth(),
             shape = RoundedCornerShape(corner = CornerSize(16.dp)),
             elevation = 2.dp,

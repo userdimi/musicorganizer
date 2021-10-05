@@ -8,15 +8,28 @@
     <fragment
         android:id="@+id/favoriteAlbumsFragment"
         android:name="de.colognecode.musicorganizer.favoritealbums.FavoriteAlbumsFragment"
-        android:label="FavoriteAlbumsFragment" >
+        android:label="FavoriteAlbumsFragment">
         <action
             android:id="@+id/action_favoriteAlbumsFragment_to_searchFragment"
-            app:destination="@id/searchFragment"
-            />
+            app:destination="@id/searchFragment" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="de.colognecode.musicorganizer.search.SearchFragment"
         android:label="search_fragment"
-        tools:layout="@layout/search_fragment" />
+        tools:layout="@layout/search_fragment">
+        <action
+            android:id="@+id/action_searchFragment_to_topAlbumsFragment"
+            app:destination="@id/topAlbumsFragment">
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/topAlbumsFragment"
+        android:name="de.colognecode.musicorganizer.topalbums.TopAlbumsFragment"
+        android:label="TopAlbumsFragment" >
+        <argument
+            android:name="artist"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
 </navigation>

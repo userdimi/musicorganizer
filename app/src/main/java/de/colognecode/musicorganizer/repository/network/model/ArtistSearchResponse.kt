@@ -11,7 +11,7 @@ data class ArtistSearchResponse(
 data class ArtistItem(
 
     @field:SerializedName("image")
-    val image: List<ImageItem?>? = null,
+    val image: List<TopAlbumsImageItem?>? = null,
 
     @field:SerializedName("mbid")
     val mbid: String? = null,
@@ -35,7 +35,7 @@ data class Results(
     val opensearchQuery: OpensearchQuery? = null,
 
     @field:SerializedName("@attr")
-    val attr: Attr? = null,
+    val attr: TopAlbumAttr? = null,
 
     @field:SerializedName("opensearch:itemsPerPage")
     val opensearchItemsPerPage: String? = null,
