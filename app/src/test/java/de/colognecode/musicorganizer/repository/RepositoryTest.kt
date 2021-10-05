@@ -5,6 +5,7 @@ import de.colognecode.musicorganizer.repository.database.daos.FavoriteAlbumsDao
 import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.*
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
@@ -29,6 +30,7 @@ internal class RepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val mockApiService = mockk<LastFMApiService>(relaxed = true)
     private val mockFavoriteAlbum = mockk<FavoriteAlbum>(relaxed = true)
+    private val mockAlbumDetailResponse = mockk<AlbumDetailResponse>()
     private val mockFavoriteAlbumDao = mockk<FavoriteAlbumsDao>(relaxed = true)
     private val testPage = 1
     private val testArtist = "testArtist"
@@ -242,4 +244,100 @@ internal class RepositoryTest {
             coVerify { mockFavoriteAlbumDao.saveFavoriteAlbum(mockFavoriteAlbum) }
         }
     }
+
+    @Nested
+    inner class AlbumDetailsTest {
+        private val testAlbum = DetailedAlbum(
+            image = listOf(),
+            mbid = "123456",
+            listeners = "2",
+            artist = "Foo",
+            playcount = "3",
+            wiki = Wiki(
+                summary = "",
+                published = "",
+                content = ""
+            ),
+            name = "FooAlbum",
+            tracks = Tracks(track = listOf()),
+            url = "https;//foo-album.de",
+            tags = Tags(tag = listOf())
+        )
+
+        @Test
+        fun `album details emit successfully`() = testDispatcher.runBlockingTest {
+            // arrange
+            coEvery {
+                mockApiService.getAlbumDetails(any(), any(), any())
+            } returns mockAlbumDetailResponse
+            every { mockAlbumDetailResponse.album } returns testAlbum
+
+            // act
+            val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name)
+
+            // assert
+            flowResult.collect { result ->
+                result.isSuccess.shouldBeTrue()
+                result.onSuccess { album ->
+                    album.shouldBe(testAlbum)
+                }
+            }
+        }
+
+        @Test
+        fun `album details emit on error`() = testDispatcher.runBlockingTest {
+            // arrange
+            coEvery {
+                mockApiService.getAlbumDetails(
+                    any(),
+                    any(),
+                    any()
+                )
+            } throws IOException()
+
+            // act
+            val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name)
+
+            // assert
+            flowResult.collect {
+                it.isFailure.shouldBeTrue()
+            }
+        }
+
+        @Test
+        fun `album details emit successfully on retry`() = testDispatcher.runBlockingTest {
+            // arrange
+            var shouldThrowError = true
+            coEvery {
+                mockApiService.getAlbumDetails(
+                    any(),
+                    any(),
+                    any()
+                )
+            } answers { if (shouldThrowError) throw IOException() else mockAlbumDetailResponse }
+
+            every { mockAlbumDetailResponse.album } returns testAlbum
+
+            pauseDispatcher {
+                // act
+                val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name)
+
+                // assert
+                launch {
+                    flowResult.collect { result ->
+                        result.isSuccess.shouldBeTrue()
+                        result.onSuccess { album ->
+                            album.shouldBe(testAlbum)
+                        }
+                    }
+                }
+                // 1st retry
+                advanceTimeBy(DELAY_ONE_SECOND)
+                // 2st retry
+                shouldThrowError = false
+                advanceTimeBy(DELAY_ONE_SECOND)
+            }
+        }
+    }
 }
+

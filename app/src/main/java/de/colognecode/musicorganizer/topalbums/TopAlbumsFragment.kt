@@ -50,7 +50,6 @@ class TopAlbumsFragment : Fragment() {
 
     private val viewModel: TopAlbumsViewModel by viewModels()
     private val args: TopAlbumsFragmentArgs by navArgs()
-    private var artist = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,18 +57,18 @@ class TopAlbumsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
-            artist = args.artist ?: ""
+            val artist = args.artist ?: ""
             viewModel.getTopAlbums(artist)
             setContent {
                 val isLoading by viewModel.isLoading.observeAsState(false)
                 val topAlbums by viewModel.topAlbums.observeAsState(initial = emptyList())
                 val topAlbumsPage by viewModel.page
-                if (artist.isNullOrEmpty()) {
+                if (artist.isEmpty()) {
                     Snackbar {
                         Text(text = "Error, no artist provided.")
                     }
                 }
-                TopAlbums(
+                TopAlbumsView(
                     artist = artist,
                     isLoading = isLoading,
                     topAlbums = topAlbums,
@@ -80,8 +79,8 @@ class TopAlbumsFragment : Fragment() {
     }
 
     @Composable
-    fun TopAlbums(
-        artist: String?,
+    fun TopAlbumsView(
+        artist: String,
         topAlbums: List<AlbumItem>,
         isLoading: Boolean?,
         topAlbumsPage: Int
@@ -93,7 +92,8 @@ class TopAlbumsFragment : Fragment() {
                     ContentTopAlbums(
                         isLoading = isLoading,
                         topAlbums = topAlbums,
-                        topAlbumsPage = topAlbumsPage
+                        topAlbumsPage = topAlbumsPage,
+                        artist = artist
                     )
                 }
             )
@@ -131,24 +131,27 @@ class TopAlbumsFragment : Fragment() {
     fun ContentTopAlbums(
         isLoading: Boolean?,
         topAlbums: List<AlbumItem>,
-        topAlbumsPage: Int
+        topAlbumsPage: Int,
+        artist: String
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            TopAlbums(
+            Albums(
                 isLoading = isLoading,
                 topAlbums = topAlbums,
-                topAlbumsPage = topAlbumsPage
+                topAlbumsPage = topAlbumsPage,
+                artist = artist
             )
         }
     }
 
     @Composable
-    fun TopAlbums(
+    fun Albums(
         isLoading: Boolean?,
         topAlbums: List<AlbumItem>,
-        topAlbumsPage: Int
+        topAlbumsPage: Int,
+        artist: String
     ) {
         if (isLoading == true && topAlbums.isEmpty()) {
             MusicOrganizerLoadingSpinner.LoadingSpinnerComposable()
@@ -212,7 +215,11 @@ class TopAlbumsFragment : Fragment() {
                 .size(280.dp)
                 .clickable(
                     onClick = {
-                        // TODO: 02.10.21 show detail screen of the album 
+                        val action = TopAlbumsFragmentDirections.actionTopAlbumsFragmentToAlbumDetailFragment(
+                            albumName,
+                            artistName
+                        )
+                        findNavController().navigate(action)
                     }
                 ),
             shape = RoundedCornerShape(corner = CornerSize(16.dp)),

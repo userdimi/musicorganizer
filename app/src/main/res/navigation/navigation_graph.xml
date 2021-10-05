@@ -31,5 +31,25 @@
             android:name="artist"
             app:argType="string"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_topAlbumsFragment_to_albumDetailFragment"
+            app:destination="@id/albumDetailFragment"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/albumDetailFragment"
+        android:name="de.colognecode.musicorganizer.albumdetail.AlbumDetailsFragment"
+        android:label="album_detail_fragment"
+        >
+        <argument
+            android:name="artist"
+            app:argType="string"
+            app:nullable="true"
+            />
+        <argument
+            android:name="album"
+            app:argType="string"
+            app:nullable="true"
+            />
     </fragment>
 </navigation>
