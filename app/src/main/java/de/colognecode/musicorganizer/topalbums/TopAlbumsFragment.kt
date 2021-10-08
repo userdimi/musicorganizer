@@ -165,12 +165,12 @@ class TopAlbumsFragment : Fragment() {
                     itemsIndexed(
                         items = topAlbums
                     ) { index: Int, album: AlbumItem ->
-                        var imageUrl = ""
-                        album.topAlbumsImage.let { imageItems ->
-                            imageUrl = imageItems.find { imageItem ->
-                                imageItem.size == "large"
-                            }?.text ?: ""
-                        }
+                        val imageUrl =
+                            album.topAlbumsImage.let { imageItems ->
+                                imageItems?.find { imageItem ->
+                                    imageItem.size == "large"
+                                }?.text ?: ""
+                            }
                         this@TopAlbumsFragment.viewModel.onTopAlbumScrollPositionChanged(
                             position = index
                         )
@@ -184,10 +184,10 @@ class TopAlbumsFragment : Fragment() {
                         }
                         AlbumCard(
                             albumImageUrl = imageUrl,
-                            albumName = album.name,
-                            artistName = album.artist.name,
-                            playCount = album.playcount,
-                            mbid = album.mbid
+                            albumName = album.name ?: "",
+                            artistName = album.artist?.name ?: "",
+                            playCount = album.playcount ?: 0,
+                            mbid = album.mbid ?: ""
                         )
                     }
                 }
@@ -215,10 +215,11 @@ class TopAlbumsFragment : Fragment() {
                 .size(280.dp)
                 .clickable(
                     onClick = {
-                        val action = TopAlbumsFragmentDirections.actionTopAlbumsFragmentToAlbumDetailFragment(
-                            albumName,
-                            artistName
-                        )
+                        val action =
+                            TopAlbumsFragmentDirections.actionTopAlbumsFragmentToAlbumDetailFragment(
+                                artistName,
+                                albumName
+                            )
                         findNavController().navigate(action)
                     }
                 ),

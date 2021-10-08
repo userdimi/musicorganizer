@@ -50,29 +50,29 @@ data class TopAlbumAttr(
 data class AlbumItem(
 
     @field:SerializedName("image")
-    val topAlbumsImage: List<TopAlbumsImageItem>,
+    val topAlbumsImage: List<TopAlbumsImageItem>?,
 
     @field:SerializedName("artist")
-    val artist: Artist,
+    val artist: Artist?,
 
     @field:SerializedName("playcount")
-    val playcount: Int,
+    val playcount: Int?,
 
     @field:SerializedName("name")
-    val name: String,
+    val name: String?,
 
     @field:SerializedName("url")
-    val url: String,
+    val url: String?,
 
     @field:SerializedName("mbid")
-    val mbid: String
+    val mbid: String?
 )
 
 data class TopAlbumsImageItem(
 
     @field:SerializedName("#text")
-    val text: String,
+    val text: String?,
 
     @field:SerializedName("size")
-    val size: String
+    val size: String?
 )

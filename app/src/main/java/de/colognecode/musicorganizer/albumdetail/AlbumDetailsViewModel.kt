@@ -26,6 +26,7 @@ class AlbumDetailsViewModel @Inject constructor(private val repository: Reposito
 
     fun getAlbumDetails(artist: String, album: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             repository.getAlbumDetails(
                 artist = artist,
                 album = album
