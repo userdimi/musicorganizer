@@ -250,7 +250,8 @@ class AlbumDetailsFragment : Fragment() {
     @Composable
     fun AlbumTracks(tracks: Tracks) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(8.dp),
 
         ) {
@@ -269,5 +270,4 @@ class AlbumDetailsFragment : Fragment() {
             )
         }
     }
-
 }
