@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -31,8 +32,14 @@ import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
 import de.colognecode.musicorganizer.components.MusicOrganizerLoadingSpinner
 import de.colognecode.musicorganizer.repository.network.model.DetailedAlbum
+import de.colognecode.musicorganizer.repository.network.model.Tracks
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.toDuration
 
+@ExperimentalTime
 @ExperimentalCoilApi
 @AndroidEntryPoint
 class AlbumDetailsFragment : Fragment() {
@@ -114,36 +121,46 @@ class AlbumDetailsFragment : Fragment() {
                 .fillMaxSize()
                 .padding(
                     start = 16.dp,
-                    end = 16.dp
+                    end = 16.dp,
                 )
         ) {
-            val imageUrl = albumDetails.image.let { imageItems ->
-                imageItems.find { imageItem ->
-                    imageItem.size == "large"
-                }?.text ?: ""
-            }
-            AlbumImage(
-                imageUrl = imageUrl
-            )
-            AlbumTitle(
-                albumTitle = albumDetails.name
-            )
-            Row(
-                modifier = Modifier
-                    .padding(
-                        top = 4.dp
-                    )
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                ArtistName(
-                    artistName = albumDetails.artist
+            AlbumHeader(albumDetails)
+            AlbumTracks(albumDetails.tracks)
+        }
+    }
+
+    @Composable
+    private fun AlbumHeader(albumDetails: DetailedAlbum) {
+        val imageUrl = albumDetails.image.let { imageItems ->
+            imageItems.find { imageItem ->
+                imageItem.size == "large"
+            }?.text ?: ""
+        }
+        AlbumImage(
+            imageUrl = imageUrl
+        )
+        AlbumTitle(
+            albumTitle = albumDetails.name
+        )
+        Row(
+            modifier = Modifier
+                .padding(
+                    top = 4.dp
                 )
-                BulletPoint()
-                TotalTracks(
-                    totalTracks = albumDetails.tracks.track.size
-                )
-            }
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            ArtistName(
+                artistName = albumDetails.artist
+            )
+            BulletPoint()
+            TotalTracks(
+                totalTracks = albumDetails.tracks.track.size
+            )
+            BulletPoint()
+            TotalDuration(
+                albumTracks = albumDetails.tracks
+            )
         }
     }
 
@@ -192,8 +209,8 @@ class AlbumDetailsFragment : Fragment() {
     fun BulletPoint() {
         Text(
             modifier = Modifier.padding(
-                start = 16.dp,
-                end = 16.dp,
+                start = 8.dp,
+                end = 8.dp,
             ),
             text = "•",
             fontSize = 16.sp,
@@ -204,11 +221,53 @@ class AlbumDetailsFragment : Fragment() {
     @Composable
     fun TotalTracks(totalTracks: Int) {
         Text(
-            modifier = Modifier.padding(
-                end = 16.dp
-            ),
             text = "$totalTracks Songs",
             fontSize = 14.sp,
         )
     }
+
+    @Composable
+    fun TotalDuration(albumTracks: Tracks) {
+        var totalDuration = 0L
+        albumTracks.track.forEach {
+            totalDuration += it.duration
+        }
+        val secondsDuration = totalDuration.toDuration(TimeUnit.SECONDS).inWholeSeconds
+        val seconds = secondsDuration % 60
+        val minutes = (secondsDuration % 3600) / 60
+        val hours = secondsDuration / 3600
+        val durationText = if (hours > 0) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
+        Text(
+            text = durationText,
+            fontSize = 14.sp
+        )
+    }
+
+    @Composable
+    fun AlbumTracks(tracks: Tracks) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(8.dp),
+
+        ) {
+            Text(
+                modifier = Modifier.weight(1f, fill = true),
+                text = "#"
+            )
+            Text(
+                modifier = Modifier.weight(1f, fill = true),
+                text = "Title"
+            )
+            Text(
+                modifier = Modifier.weight(1f, fill = true),
+                text = "Duration",
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+
 }
