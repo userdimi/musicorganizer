@@ -10,7 +10,10 @@ import de.colognecode.musicorganizer.repository.network.model.DetailedAlbum
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
+import kotlin.time.toDuration
 
 @HiltViewModel
 class AlbumDetailsViewModel @Inject constructor(private val repository: Repository) : ViewModel() {
@@ -42,5 +45,19 @@ class AlbumDetailsViewModel @Inject constructor(private val repository: Reposito
                     }
                 }
         }
+    }
+
+    @ExperimentalTime
+    fun getDurationAsFormatTimeString(totalDuration: Long): String {
+        val secondsDuration = totalDuration.toDuration(TimeUnit.SECONDS).inWholeSeconds
+        val seconds = secondsDuration % 60
+        val minutes = (secondsDuration % 3600) / 60
+        val hours = secondsDuration / 3600
+        val durationText = if (hours > 0) {
+            String.format("%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            String.format("%02d:%02d", minutes, seconds)
+        }
+        return durationText
     }
 }

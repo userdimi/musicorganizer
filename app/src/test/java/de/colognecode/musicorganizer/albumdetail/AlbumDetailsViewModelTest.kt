@@ -8,6 +8,7 @@ import de.colognecode.musicorganizer.repository.network.model.Tags
 import de.colognecode.musicorganizer.repository.network.model.Tracks
 import de.colognecode.musicorganizer.repository.network.model.Wiki
 import de.colognecode.musicorganizer.util.CoroutineTestRule
+import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -20,6 +21,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import kotlin.time.ExperimentalTime
 
 @ExperimentalCoroutinesApi
 class AlbumDetailsViewModelTest {
@@ -107,5 +109,33 @@ class AlbumDetailsViewModelTest {
         // assert
         verify { mockIsErrorObserver.onChanged(true) }
         verify { mockIsLoadingObserver.onChanged(false) }
+    }
+
+    @ExperimentalTime
+    @Test
+    fun `should return as minute and seconds formatted string`() {
+        // arrange
+        val testDurationSeconds = 150L
+        val expectedFormattedDuration = "02:30"
+
+        // act
+        val actualFormattedString = viewModel.getDurationAsFormatTimeString(testDurationSeconds)
+
+        //
+        actualFormattedString.shouldBeEqualComparingTo(expectedFormattedDuration)
+    }
+
+    @ExperimentalTime
+    @Test
+    fun `should return as hours, minute and seconds formatted string`() {
+        // arrange
+        val testDurationSeconds = 5400L
+        val expectedFormattedDuration = "01:30:00"
+
+        // act
+        val actualFormattedString = viewModel.getDurationAsFormatTimeString(testDurationSeconds)
+
+        //
+        actualFormattedString.shouldBeEqualComparingTo(expectedFormattedDuration)
     }
 }

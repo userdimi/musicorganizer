@@ -216,10 +216,11 @@ class TopAlbumsFragment : Fragment() {
                 .clickable(
                     onClick = {
                         val action =
-                            TopAlbumsFragmentDirections.actionTopAlbumsFragmentToAlbumDetailFragment(
-                                artistName,
-                                albumName
-                            )
+                            TopAlbumsFragmentDirections
+                                .actionTopAlbumsFragmentToAlbumDetailFragment(
+                                    artistName,
+                                    albumName
+                                )
                         findNavController().navigate(action)
                     }
                 ),

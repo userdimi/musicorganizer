@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -17,6 +19,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
@@ -32,12 +35,11 @@ import coil.compose.rememberImagePainter
 import dagger.hilt.android.AndroidEntryPoint
 import de.colognecode.musicorganizer.components.MusicOrganizerLoadingSpinner
 import de.colognecode.musicorganizer.repository.network.model.DetailedAlbum
+import de.colognecode.musicorganizer.repository.network.model.TrackItem
 import de.colognecode.musicorganizer.repository.network.model.Tracks
 import de.colognecode.musicorganizer.theme.MusicOrganizerTheme
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.time.ExperimentalTime
-import kotlin.time.toDuration
 
 @ExperimentalTime
 @ExperimentalCoilApi
@@ -125,7 +127,7 @@ class AlbumDetailsFragment : Fragment() {
                 )
         ) {
             AlbumHeader(albumDetails)
-            AlbumTracks(albumDetails.tracks)
+            AlbumTracks(albumDetails.tracks.track)
         }
     }
 
@@ -172,7 +174,7 @@ class AlbumDetailsFragment : Fragment() {
             painter = painter,
             contentDescription = "Image of the detailed album",
             modifier = Modifier
-                .fillMaxWidth()
+                .size(200.dp)
                 .padding(
                     top = 8.dp
                 )
@@ -181,7 +183,7 @@ class AlbumDetailsFragment : Fragment() {
                         corner = CornerSize(8.dp)
                     )
                 ),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
     }
 
@@ -232,15 +234,7 @@ class AlbumDetailsFragment : Fragment() {
         albumTracks.track.forEach {
             totalDuration += it.duration
         }
-        val secondsDuration = totalDuration.toDuration(TimeUnit.SECONDS).inWholeSeconds
-        val seconds = secondsDuration % 60
-        val minutes = (secondsDuration % 3600) / 60
-        val hours = secondsDuration / 3600
-        val durationText = if (hours > 0) {
-            String.format("%02d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            String.format("%02d:%02d", minutes, seconds)
-        }
+        val durationText = viewModel.getDurationAsFormatTimeString(totalDuration)
         Text(
             text = durationText,
             fontSize = 14.sp
@@ -248,26 +242,82 @@ class AlbumDetailsFragment : Fragment() {
     }
 
     @Composable
-    fun AlbumTracks(tracks: Tracks) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
+    fun AlbumTracks(tracks: List<TrackItem>) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f, fill = true),
+                    text = "#"
+                )
+                Text(
+                    modifier = Modifier.weight(1f, fill = true),
+                    text = "Title"
+                )
+                Text(
+                    modifier = Modifier.weight(1f, fill = true),
+                    text = "Duration",
+                    textAlign = TextAlign.Center
+                )
+            }
+            LazyColumn(
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                itemsIndexed(
+                    items = tracks
+                ) { position: Int, track: TrackItem ->
+                    val trackDuration = viewModel.getDurationAsFormatTimeString(
+                        totalDuration = track.duration.toLong()
+                    )
+                    TrackItem(
+                        trackPosition = position.toString(),
+                        trackTitle = track.name,
+                        trackDuration = trackDuration
+                    )
+                }
+            }
+        }
+    }
 
+    @Composable
+    fun TrackItem(
+        trackPosition: String,
+        trackTitle: String,
+        trackDuration: String
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 modifier = Modifier.weight(1f, fill = true),
-                text = "#"
+                text = trackPosition,
+                style = MaterialTheme.typography.body2
             )
             Text(
                 modifier = Modifier.weight(1f, fill = true),
-                text = "Title"
+                text = trackTitle,
+                style = MaterialTheme.typography.body2
             )
             Text(
                 modifier = Modifier.weight(1f, fill = true),
-                text = "Duration",
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                text = trackDuration,
+                style = MaterialTheme.typography.body2
+
             )
         }
+        Divider(
+            modifier = Modifier.padding(
+                bottom = 4.dp,
+                top = 4.dp
+            ),
+            color = Color.Black,
+            thickness = 1.dp
+        )
     }
 }
