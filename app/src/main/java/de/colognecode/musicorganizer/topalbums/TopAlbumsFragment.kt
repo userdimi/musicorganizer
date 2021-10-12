@@ -8,8 +8,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -23,7 +21,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +58,7 @@ class TopAlbumsFragment : Fragment() {
             viewModel.getTopAlbums(artist)
             setContent {
                 val isLoading by viewModel.isLoading.observeAsState(false)
+                val isFavorite by viewModel.isFavorite.observeAsState(false)
                 val topAlbums by viewModel.topAlbums.observeAsState(initial = emptyList())
                 val topAlbumsPage by viewModel.page
                 if (artist.isEmpty()) {
@@ -72,7 +70,8 @@ class TopAlbumsFragment : Fragment() {
                     artist = artist,
                     isLoading = isLoading,
                     topAlbums = topAlbums,
-                    topAlbumsPage = topAlbumsPage
+                    topAlbumsPage = topAlbumsPage,
+                    isFavorite = isFavorite
                 )
             }
         }
@@ -83,7 +82,8 @@ class TopAlbumsFragment : Fragment() {
         artist: String,
         topAlbums: List<AlbumItem>,
         isLoading: Boolean?,
-        topAlbumsPage: Int
+        topAlbumsPage: Int,
+        isFavorite: Boolean
     ) {
         MusicOrganizerTheme {
             Scaffold(
@@ -93,7 +93,8 @@ class TopAlbumsFragment : Fragment() {
                         isLoading = isLoading,
                         topAlbums = topAlbums,
                         topAlbumsPage = topAlbumsPage,
-                        artist = artist
+                        artist = artist,
+                        isFavorite = isFavorite
                     )
                 }
             )
@@ -132,7 +133,8 @@ class TopAlbumsFragment : Fragment() {
         isLoading: Boolean?,
         topAlbums: List<AlbumItem>,
         topAlbumsPage: Int,
-        artist: String
+        artist: String,
+        isFavorite: Boolean
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -141,7 +143,8 @@ class TopAlbumsFragment : Fragment() {
                 isLoading = isLoading,
                 topAlbums = topAlbums,
                 topAlbumsPage = topAlbumsPage,
-                artist = artist
+                artist = artist,
+                isFavorite = isFavorite
             )
         }
     }
@@ -151,7 +154,8 @@ class TopAlbumsFragment : Fragment() {
         isLoading: Boolean?,
         topAlbums: List<AlbumItem>,
         topAlbumsPage: Int,
-        artist: String
+        artist: String,
+        isFavorite: Boolean
     ) {
         if (isLoading == true && topAlbums.isEmpty()) {
             MusicOrganizerLoadingSpinner.LoadingSpinnerComposable()
@@ -187,7 +191,8 @@ class TopAlbumsFragment : Fragment() {
                             albumName = album.name ?: "",
                             artistName = album.artist?.name ?: "",
                             playCount = album.playcount ?: 0,
-                            mbid = album.mbid ?: ""
+                            mbid = album.mbid ?: "",
+                            isFavorite = isFavorite
                         )
                     }
                 }
@@ -204,7 +209,8 @@ class TopAlbumsFragment : Fragment() {
         albumName: String,
         artistName: String,
         playCount: Int,
-        mbid: String
+        mbid: String,
+        isFavorite: Boolean
     ) {
         Card(
             modifier = Modifier
@@ -259,9 +265,7 @@ class TopAlbumsFragment : Fragment() {
                                 color = MaterialTheme.colors.onSurface
                             )
                         }
-                        val interactionSource = remember { MutableInteractionSource() }
-                        val isPressed by interactionSource.collectIsPressedAsState()
-                        val color = if (isPressed) Color.Red else Color.LightGray
+                        val color = if (isFavorite) Color.Red else Color.LightGray
                         IconButton(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -281,7 +285,7 @@ class TopAlbumsFragment : Fragment() {
                             Icon(
                                 imageVector = Icons.Default.Favorite,
                                 contentDescription = "Add to favorite albums",
-                                tint = Color.LightGray
+                                tint = color
                             )
                         }
                     }

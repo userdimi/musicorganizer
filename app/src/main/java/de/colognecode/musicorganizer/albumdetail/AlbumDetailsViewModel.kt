@@ -18,6 +18,7 @@ import kotlin.time.toDuration
 @HiltViewModel
 class AlbumDetailsViewModel @Inject constructor(private val repository: Repository) : ViewModel() {
 
+
     private val _albumDetails = MutableLiveData<DetailedAlbum>()
     val albumDetails: LiveData<DetailedAlbum> = _albumDetails
 

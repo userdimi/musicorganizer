@@ -32,6 +32,7 @@ class TopAlbumsViewModelTest {
     private val mockTopAlbumsObserver = mockk<Observer<List<AlbumItem>>>(relaxed = true)
     private val mockIsErrorObserver = mockk<Observer<Boolean>>(relaxed = true)
     private val mockIsLoading = mockk<Observer<Boolean>>(relaxed = true)
+    private val mockIsFavoriteObserver = mockk<Observer<Boolean>>(relaxed = true)
     private val mockRepository = mockk<Repository>(relaxed = true)
     private val mockArtist = mockk<Artist>(relaxed = true)
     private val mockFavoriteAlbum = mockk<FavoriteAlbum>(relaxed = true)
@@ -66,6 +67,7 @@ class TopAlbumsViewModelTest {
             topAlbums.observeForever(mockTopAlbumsObserver)
             isError.observeForever(mockIsErrorObserver)
             isLoading.observeForever(mockIsLoading)
+            isFavorite.observeForever(mockIsFavoriteObserver)
         }
     }
 
@@ -150,5 +152,6 @@ class TopAlbumsViewModelTest {
                 any()
             )
         }
+        verify { mockIsFavoriteObserver.onChanged(true) }
     }
 }

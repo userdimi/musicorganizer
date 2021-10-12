@@ -36,6 +36,9 @@ class TopAlbumsViewModel @Inject constructor(private val repository: Repository)
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading = _isLoading
 
+    private val _isFavorite = MutableLiveData<Boolean>()
+    val isFavorite = _isFavorite
+
     private var totalPages = START_PAGE_INDEX
 
     val page = mutableStateOf(START_PAGE_INDEX)
@@ -123,6 +126,7 @@ class TopAlbumsViewModel @Inject constructor(private val repository: Repository)
                         favoriteAlbum = favoriteAlbum,
                         favoriteAlbumDetails = favoriteAlbumDetails
                     )
+                    _isFavorite.value = true
                 }
             }
         }
