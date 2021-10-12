@@ -146,4 +146,3 @@ class TopAlbumsViewModel @Inject constructor(private val repository: Repository)
         return favoriteAlbumDetails
     }
 }
-

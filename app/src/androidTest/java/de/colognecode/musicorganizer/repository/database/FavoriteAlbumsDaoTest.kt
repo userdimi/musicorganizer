@@ -63,14 +63,14 @@ class FavoriteAlbumsDaoTest {
     @After
     @Throws(IOException::class)
     fun closeDb() {
-         database.close()
+        database.close()
     }
 
     @Test
     @Throws(Exception::class)
     fun favoritesAlbumsShouldBeSavedAndReadFromDb() = rule.dispatcher.runBlockingTest {
         // act
-        favoriteAlbumsDao.saveFavoriteAlbum(expectedFavoriteFooAlbum )
+        favoriteAlbumsDao.saveFavoriteAlbum(expectedFavoriteFooAlbum)
 
         // assert
         val actualFavoriteAlbums = favoriteAlbumsDao.getAllFavoriteAlbums()
@@ -91,5 +91,4 @@ class FavoriteAlbumsDaoTest {
         //
         assertThat(actualFavoriteAlbumDetails, equalTo(expectedAlbumDetails))
     }
-
 }
