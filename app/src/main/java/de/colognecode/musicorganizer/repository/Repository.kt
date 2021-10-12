@@ -5,6 +5,7 @@ import de.colognecode.musicorganizer.repository.database.daos.FavoriteAlbumsDao
 import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
 import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.Artistmatches
+import de.colognecode.musicorganizer.repository.network.model.DetailedAlbum
 import de.colognecode.musicorganizer.repository.network.model.TopAlbums
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
@@ -21,6 +22,7 @@ class Repository @Inject constructor(
         const val DELAY_ONE_SECOND = 1000L
         private const val SEARCH_METHOD = "artist.search"
         private const val TOP_ALBUMS_METHOD = "artist.gettopalbums"
+        private const val ALBUM_DETAILS_METHOD = "album.getinfo"
     }
 
     suspend fun getArtistsSearchResult(
@@ -74,5 +76,28 @@ class Repository @Inject constructor(
 
     suspend fun saveFavoriteAlbumToDatabase(favoriteAlbum: FavoriteAlbum) {
         favoriteAlbumsDao.saveFavoriteAlbum(favoriteAlbum)
+    }
+
+    suspend fun getAlbumDetails(
+        artist: String,
+        album: String
+    ): Flow<Result<DetailedAlbum>> {
+        return flow {
+            val albumDetailResponse = lastFMApiService.getAlbumDetails(
+                method = ALBUM_DETAILS_METHOD,
+                artist = artist,
+                album = album
+            )
+            emit(Result.success(albumDetailResponse.album))
+        }
+            .retry(2) { throwable ->
+                (throwable is Exception).also { isException ->
+                    if (isException) delay(DELAY_ONE_SECOND)
+                }
+            }
+            .catch { throwable ->
+                emit(Result.failure(throwable))
+            }
+            .flowOn(ioDispatcher)
     }
 }
