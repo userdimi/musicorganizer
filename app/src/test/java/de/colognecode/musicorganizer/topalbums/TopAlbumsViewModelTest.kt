@@ -4,10 +4,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import de.colognecode.musicorganizer.repository.Repository
 import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
-import de.colognecode.musicorganizer.repository.network.model.AlbumItem
-import de.colognecode.musicorganizer.repository.network.model.Artist
-import de.colognecode.musicorganizer.repository.network.model.TopAlbumAttr
-import de.colognecode.musicorganizer.repository.network.model.TopAlbums
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbumDetails
+import de.colognecode.musicorganizer.repository.network.model.*
 import de.colognecode.musicorganizer.util.CoroutineTestRule
 import io.kotest.matchers.collections.shouldContain
 import io.mockk.coEvery
@@ -38,7 +36,11 @@ class TopAlbumsViewModelTest {
     private val mockRepository = mockk<Repository>(relaxed = true)
     private val mockArtist = mockk<Artist>(relaxed = true)
     private val mockFavoriteAlbum = mockk<FavoriteAlbum>(relaxed = true)
+    private val mockAlbumDetails = mockk<DetailedAlbum>(relaxed = true)
+    private val mockFavoriteAlbumDetails = mockk<FavoriteAlbumDetails>( relaxed = true)
+
     private val testArtist = "TestArtist"
+    private val testAlbum = "Album"
     private val testPage = 1
     private val testAlbumItem1 = AlbumItem(
         topAlbumsImage = listOf(),
@@ -125,10 +127,32 @@ class TopAlbumsViewModelTest {
 
     @Test
     fun `should saved album as favorite`() = rule.dispatcher.runBlockingTest {
+        // arrange
+        val testChannel = Channel<Result<DetailedAlbum>>()
+        val testFlow = testChannel.consumeAsFlow()
+
+        coEvery {
+            mockRepository.getAlbumDetails(
+                any(),
+                any()
+            )
+        } returns testFlow
+
+        launch {
+            testChannel.send(Result.success(mockAlbumDetails))
+        }
+
         // act
         topAlbumsViewModel.saveAlbumAsFavorite(mockFavoriteAlbum)
 
         // assert
-        coVerify { mockRepository.saveFavoriteAlbumToDatabase(mockFavoriteAlbum) }
+        coVerify { mockRepository.getAlbumDetails(any(), any()) }
+
+        coVerify {
+            mockRepository.saveFavoriteAlbumToDatabase(
+                any(),
+                any()
+            )
+        }
     }
 }

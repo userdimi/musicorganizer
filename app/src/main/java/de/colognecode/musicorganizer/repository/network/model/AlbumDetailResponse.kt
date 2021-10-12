@@ -59,13 +59,13 @@ data class DetailedAlbum(
     val image: List<ImageItem>,
 
     @field:SerializedName("mbid")
-    val mbid: String,
+    val mbid: String?,
 
     @field:SerializedName("listeners")
     val listeners: String,
 
     @field:SerializedName("artist")
-    val artist: String,
+    val artist: String?,
 
     @field:SerializedName("playcount")
     val playcount: String,
@@ -74,13 +74,13 @@ data class DetailedAlbum(
     val wiki: Wiki,
 
     @field:SerializedName("name")
-    val name: String,
+    val name: String?,
 
     @field:SerializedName("tracks")
-    val tracks: Tracks,
+    val tracks: Tracks?,
 
     @field:SerializedName("url")
-    val url: String,
+    val url: String?,
 
     @field:SerializedName("tags")
     val tags: Tags

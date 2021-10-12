@@ -81,7 +81,7 @@ class AlbumDetailsFragment : Fragment() {
     fun AlbumDetailsView(albumDetails: DetailedAlbum) {
         MusicOrganizerTheme {
             Scaffold(
-                topBar = { AppBar(albumDetails.name) },
+                topBar = { AppBar(albumDetails.name ?: "") },
                 content = {
                     AlbumDetailsContent(
                         albumDetails = albumDetails
@@ -127,7 +127,7 @@ class AlbumDetailsFragment : Fragment() {
                 )
         ) {
             AlbumHeader(albumDetails)
-            AlbumTracks(albumDetails.tracks.track)
+            AlbumTracks(albumDetails.tracks?.track)
         }
     }
 
@@ -142,7 +142,7 @@ class AlbumDetailsFragment : Fragment() {
             imageUrl = imageUrl
         )
         AlbumTitle(
-            albumTitle = albumDetails.name
+            albumTitle = albumDetails.name ?: ""
         )
         Row(
             modifier = Modifier
@@ -153,11 +153,11 @@ class AlbumDetailsFragment : Fragment() {
             verticalAlignment = Alignment.Bottom
         ) {
             ArtistName(
-                artistName = albumDetails.artist
+                artistName = albumDetails.artist ?: ""
             )
             BulletPoint()
             TotalTracks(
-                totalTracks = albumDetails.tracks.track.size
+                totalTracks = albumDetails.tracks?.track?.size ?: 0
             )
             BulletPoint()
             TotalDuration(
@@ -229,9 +229,9 @@ class AlbumDetailsFragment : Fragment() {
     }
 
     @Composable
-    fun TotalDuration(albumTracks: Tracks) {
+    fun TotalDuration(albumTracks: Tracks?) {
         var totalDuration = 0L
-        albumTracks.track.forEach {
+        albumTracks?.track?.forEach {
             totalDuration += it.duration
         }
         val durationText = viewModel.getDurationAsFormatTimeString(totalDuration)
@@ -242,7 +242,7 @@ class AlbumDetailsFragment : Fragment() {
     }
 
     @Composable
-    fun AlbumTracks(tracks: List<TrackItem>) {
+    fun AlbumTracks(tracks: List<TrackItem>?) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -268,17 +268,19 @@ class AlbumDetailsFragment : Fragment() {
             LazyColumn(
                 contentPadding = PaddingValues(8.dp)
             ) {
-                itemsIndexed(
-                    items = tracks
-                ) { position: Int, track: TrackItem ->
-                    val trackDuration = viewModel.getDurationAsFormatTimeString(
-                        totalDuration = track.duration.toLong()
-                    )
-                    TrackItem(
-                        trackPosition = position.toString(),
-                        trackTitle = track.name,
-                        trackDuration = trackDuration
-                    )
+                tracks?.let {
+                    itemsIndexed(
+                        items = tracks
+                    ) { position: Int, track: TrackItem ->
+                        val trackDuration = viewModel.getDurationAsFormatTimeString(
+                            totalDuration = track.duration.toLong()
+                        )
+                        TrackItem(
+                            trackPosition = position.toString(),
+                            trackTitle = track.name,
+                            trackDuration = trackDuration
+                        )
+                    }
                 }
             }
         }

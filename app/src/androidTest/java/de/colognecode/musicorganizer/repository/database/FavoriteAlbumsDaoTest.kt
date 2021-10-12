@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import de.colognecode.musicorganizer.repository.database.daos.FavoriteAlbumsDao
 import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbumDetails
 import de.colognecode.musicorganizer.util.InstrumentedCoroutineTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
@@ -29,12 +30,22 @@ class FavoriteAlbumsDaoTest {
     private lateinit var favoriteAlbumsDao: FavoriteAlbumsDao
     private lateinit var database: MusicOrganizerDatabase
 
-    private val favoriteFooAlbum = FavoriteAlbum(
+    private val expectedFavoriteFooAlbum = FavoriteAlbum(
         mbid = "12345",
         albumImageUrl = "https://foo-album-image.com",
         albumName = "Foo Album",
         artistName = "Foo Artist",
         playCount = 12345
+    )
+
+    private val expectedAlbumDetails = FavoriteAlbumDetails(
+        mbid = "12345",
+        albumImageUrl = "ttps://foo-album-image.com",
+        albumName = "Foo Album",
+        artistName = "Foo Artist",
+        totalTracks = 10,
+        totalDuration = 1500L,
+        tracks = listOf()
     )
 
     @Before
@@ -52,18 +63,33 @@ class FavoriteAlbumsDaoTest {
     @After
     @Throws(IOException::class)
     fun closeDb() {
-        // database.close()
+         database.close()
     }
 
     @Test
     @Throws(Exception::class)
     fun favoritesAlbumsShouldBeSavedAndReadFromDb() = rule.dispatcher.runBlockingTest {
         // act
-        favoriteAlbumsDao.saveFavoriteAlbum(favoriteFooAlbum)
+        favoriteAlbumsDao.saveFavoriteAlbum(expectedFavoriteFooAlbum )
 
         // assert
-        val expectedFavoriteAlbums = favoriteAlbumsDao.getAllFavoriteAlbums()
+        val actualFavoriteAlbums = favoriteAlbumsDao.getAllFavoriteAlbums()
 
-        assertThat(expectedFavoriteAlbums[0], equalTo(favoriteFooAlbum))
+        assertThat(actualFavoriteAlbums[0], equalTo(expectedFavoriteFooAlbum))
     }
+
+    @Test
+    @Throws(Exception::class)
+    fun favoritesAlbumDetailShouldBeWriteAndReadFromDb() = rule.dispatcher.runBlockingTest {
+
+        // act
+        favoriteAlbumsDao.saveFavoriteAlbumDetails(expectedAlbumDetails)
+
+        // assert
+        val actualFavoriteAlbumDetails = favoriteAlbumsDao.getFavoriteAlbumDetailsByMbid("12345")
+
+        //
+        assertThat(actualFavoriteAlbumDetails, equalTo(expectedAlbumDetails))
+    }
+
 }

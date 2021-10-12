@@ -3,6 +3,7 @@ package de.colognecode.musicorganizer.repository
 import de.colognecode.musicorganizer.repository.Repository.Companion.DELAY_ONE_SECOND
 import de.colognecode.musicorganizer.repository.database.daos.FavoriteAlbumsDao
 import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbumDetails
 import de.colognecode.musicorganizer.repository.network.LastFMApiService
 import de.colognecode.musicorganizer.repository.network.model.*
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -32,6 +33,7 @@ internal class RepositoryTest {
     private val mockFavoriteAlbum = mockk<FavoriteAlbum>(relaxed = true)
     private val mockAlbumDetailResponse = mockk<AlbumDetailResponse>()
     private val mockFavoriteAlbumDao = mockk<FavoriteAlbumsDao>(relaxed = true)
+    private val mockFavoriteAlbumDetails = mockk<FavoriteAlbumDetails>(relaxed = true)
     private val testPage = 1
     private val testArtist = "testArtist"
     private val repository = Repository(mockApiService, testDispatcher, mockFavoriteAlbumDao)
@@ -236,13 +238,15 @@ internal class RepositoryTest {
     inner class FavoriteAlbumTest {
 
         @Test
-        fun `should save favorite album to database`() = testDispatcher.runBlockingTest {
-            // act
-            repository.saveFavoriteAlbumToDatabase(mockFavoriteAlbum)
+        fun `should save favorite album with details to database`() =
+            testDispatcher.runBlockingTest {
+                // act
+                repository.saveFavoriteAlbumToDatabase(mockFavoriteAlbum, mockFavoriteAlbumDetails)
 
-            // assert
-            coVerify { mockFavoriteAlbumDao.saveFavoriteAlbum(mockFavoriteAlbum) }
-        }
+                // assert
+                coVerify { mockFavoriteAlbumDao.saveFavoriteAlbum(mockFavoriteAlbum) }
+                coVerify { mockFavoriteAlbumDao.saveFavoriteAlbumDetails(mockFavoriteAlbumDetails) }
+            }
     }
 
     @Nested
@@ -273,7 +277,7 @@ internal class RepositoryTest {
             every { mockAlbumDetailResponse.album } returns testAlbum
 
             // act
-            val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name)
+            val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name ?: "")
 
             // assert
             flowResult.collect { result ->
@@ -296,7 +300,7 @@ internal class RepositoryTest {
             } throws IOException()
 
             // act
-            val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name)
+            val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name ?: "")
 
             // assert
             flowResult.collect {
@@ -320,7 +324,7 @@ internal class RepositoryTest {
 
             pauseDispatcher {
                 // act
-                val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name)
+                val flowResult = repository.getAlbumDetails(testArtist, testAlbum.name ?: "")
 
                 // assert
                 launch {

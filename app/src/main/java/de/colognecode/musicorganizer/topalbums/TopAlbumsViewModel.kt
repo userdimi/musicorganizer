@@ -9,7 +9,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.colognecode.musicorganizer.repository.Repository
 import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbum
+import de.colognecode.musicorganizer.repository.database.entities.FavoriteAlbumDetails
 import de.colognecode.musicorganizer.repository.network.model.AlbumItem
+import de.colognecode.musicorganizer.repository.network.model.DetailedAlbum
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -106,7 +108,42 @@ class TopAlbumsViewModel @Inject constructor(private val repository: Repository)
 
     fun saveAlbumAsFavorite(favoriteAlbum: FavoriteAlbum) {
         viewModelScope.launch {
-            repository.saveFavoriteAlbumToDatabase(favoriteAlbum)
+            repository.getAlbumDetails(
+                artist = favoriteAlbum.artistName,
+                album = favoriteAlbum.albumName
+            ).collect { result ->
+                result.onSuccess { albumDetails ->
+                    var totalDuration = 0L
+                    albumDetails.tracks?.track?.forEach { trackItem ->
+                        totalDuration += trackItem.duration
+                    }
+                    val favoriteAlbumDetails =
+                        createFavoriteAlbumDetails(albumDetails, totalDuration)
+                    repository.saveFavoriteAlbumToDatabase(
+                        favoriteAlbum = favoriteAlbum,
+                        favoriteAlbumDetails = favoriteAlbumDetails
+                    )
+                }
+            }
         }
     }
+
+    private fun createFavoriteAlbumDetails(
+        albumDetails: DetailedAlbum,
+        totalDuration: Long
+    ): FavoriteAlbumDetails {
+        val favoriteAlbumDetails = FavoriteAlbumDetails(
+            mbid = albumDetails.mbid ?: "",
+            albumImageUrl = albumDetails.image.find { imageItem ->
+                imageItem.size == "large"
+            }?.text ?: "",
+            albumName = albumDetails.name,
+            artistName = albumDetails.artist,
+            totalTracks = albumDetails.tracks?.track?.size,
+            totalDuration = totalDuration,
+            tracks = albumDetails.tracks?.track
+        )
+        return favoriteAlbumDetails
+    }
 }
+

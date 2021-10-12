@@ -78,7 +78,7 @@ class AlbumDetailsViewModelTest {
         }
 
         // act
-        viewModel.getAlbumDetails(testAlbum.artist, testAlbum.name)
+        viewModel.getAlbumDetails(testAlbum.artist ?: "", testAlbum.name ?: "")
 
         // assert
         verify { mockAlbumDetailsObserver.onChanged(testAlbum) }
@@ -104,7 +104,7 @@ class AlbumDetailsViewModelTest {
         }
 
         // act
-        viewModel.getAlbumDetails(testAlbum.artist, testAlbum.name)
+        viewModel.getAlbumDetails(testAlbum.artist ?: "", testAlbum.name ?: "")
 
         // assert
         verify { mockIsErrorObserver.onChanged(true) }
